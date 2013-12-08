@@ -76,14 +76,17 @@ var gl4 = (function() {
     };
 })();
 
-var Mouse = {pos: {x: 0, y: 0}, inertia: {x: 0, y: 0}};
-window.onmousemove = function(event) {
-    Mouse.inertia.x = event.clientX - Mouse.pos.x;
-    Mouse.inertia.y = event.clientY - Mouse.pos.y;
+var Mouse = (function() {
+    var obj = {pos: {x: 0, y: 0}, inertia: {x: 0, y: 0}};
+    window.onmousemove = function(event) {
+        obj.inertia.x = event.clientX - obj.pos.x;
+        obj.inertia.y = event.clientY - obj.pos.y;
 
-    Mouse.pos.x = event.clientX;
-    Mouse.pos.y = event.clientY;
-}
+        obj.pos.x = event.clientX;
+        obj.pos.y = event.clientY;
+    }
+    return obj;
+})();
 
 function move(target, speed) {
     gl4.register(target, function(object) {
