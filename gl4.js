@@ -30,14 +30,20 @@ var gl4 = (function() {
     }
 
     return {
-        create: function(imageSource, x, y, tags) {
+        tags: tags,
+
+        create: function(imageSource, x, y, objTags) {
             var img = new Image();
             // TODO: make sure the image is already loaded before rendering.
             img.src = imageSource;
             var object = {img: img, x: x, y: y, tags: tags};
             objects.push(object);
-            tags.forEach(function(tag) {
-                tags[tag].push(object);
+            objTags.forEach(function(tag) {
+                if (tags[tag] === undefined) {
+                    tags[tag] = [object];
+                } else {
+                    tags[tag].push(object);
+                }
             });
         },
 
@@ -52,5 +58,7 @@ var gl4 = (function() {
     };
 })();
 
-gl4.create('star.png', 0, 0, []);
+gl4.create('star.png', 0, 0, ['star']);
+console.log(gl4.tags)
 gl4.start();
+
