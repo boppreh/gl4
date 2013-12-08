@@ -121,4 +121,50 @@ function push(target, acceleration) {
     });
 }
 
+function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
+    force = typeof force !== 'undefined' ? force : 5;
+    turningSpeed = typeof turningSpeed !== 'undefined' ? turningSpeed : 30;
+    maxTolerableDistance = typeof maxTolerableDistance !== 'undefined' ? maxTolerableDistance : 10;
+
+    function findAngle(currentAngle, difX, difY) {
+        var angle = Math.atan2(difY, difX);
+        if (force < 0) {
+            angle += Math.PI;
+        }
+
+		var totalAngularDifference = angle - currentAngle;
+		if (totalAngularDifference > Math.PI) {
+			totalAngularDifference -= Math.PI * 2
+        } else if (totalAngularDifference < -Math.PI) {
+			totalAngularDifference += Math.PI * 2
+        }
+		
+		if (Math.abs(totalAngularDifference) > turningSpeed) {
+			return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
+		} else {
+			return angle;
+		}
+    }
+
+    gl4.register(objTag, function(object) {
+        gl4.tagged(targetTag).forEach(function(target) {
+
+            var difX = target.pos.x - object.pos.x;
+            var difY = target.pos.y - object.pos.y;
+
+            if (difX * difX + difY * difY <= maxTolerableDistance) {
+                return;
+            }
+
+            if (force) {
+                var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY);
+                var f = Math.abs(force);
+                object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
+            } else {
+                object.pos.angle = findAngle(object.angle, difX, difY);
+            }
+        });
+    });
+}
+
 gl4.start();
