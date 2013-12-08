@@ -123,16 +123,4 @@ function push(target, acceleration) {
     });
 }
 
-gl4.create('star.png', ['star'], {x: 100, y: 100, angle: Math.PI}, null);
 gl4.start();
-
-canvas.onclick = function() {
-    if (gl4.isRunning()) {
-        gl4.stop();
-    } else {
-        gl4.start();
-    }
-}
-
-push('star', {angle: 0.001})
-
