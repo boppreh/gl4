@@ -25,9 +25,9 @@ var gl4 = (function() {
 
         context.clearRect(0, 0, canvas.width, canvas.height);
         objects.forEach(function(object) {
-            object.x += object.inertia.x;
-            object.y += object.inertia.y;
-            context.drawImage(object.img, object.x, object.y);
+            object.pos.x += object.inertia.x;
+            object.pos.y += object.inertia.y;
+            context.drawImage(object.img, object.pos.x, object.pos.y);
         });
 
         behaviors.forEach(function(behavior) {
@@ -52,13 +52,14 @@ var gl4 = (function() {
             behaviors.push({tag: tag, func: func});
         },
 
-        create: function(imageSource, x, y, objTags, inertia) {
+        create: function(imageSource, objTags, pos, inertia) {
+            pos = pos || {x: 0, y: 0};
             inertia = inertia || {x: 0, y: 0};
 
             var img = new Image();
             // TODO: make sure the image is already loaded before rendering.
             img.src = imageSource;
-            var object = {img: img, x: x, y: y, tags: tags, inertia: inertia};
+            var object = {img: img, tags: tags, pos: pos, inertia: inertia};
             objects.push(object);
             objTags.forEach(function(tag) {
                 if (tags[tag] === undefined) {
@@ -87,7 +88,7 @@ function push(target, acceleration) {
     });
 }
 
-gl4.create('star.png', 0, 0, ['star']);
+gl4.create('star.png', ['star']);
 gl4.start();
 
 push('star', {x: 0.1, y: 0.01})
