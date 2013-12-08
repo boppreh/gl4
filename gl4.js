@@ -19,6 +19,9 @@ var gl4 = (function() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         objects.forEach(function(object) {
             object.move(object.inertia);
+            object.inertia.x *= (1 - object.friction.x);
+            object.inertia.y *= (1 - object.friction.y);
+            object.inertia.angle *= (1 - object.friction.angle);
 
             context.save();
             context.translate(object.pos.x, object.pos.y);
@@ -61,9 +64,10 @@ var gl4 = (function() {
             behaviors.push({tag: tag, func: func});
         },
 
-        create: function(imageSource, objTags, pos, inertia) {
+        create: function(imageSource, objTags, pos, inertia, friction) {
             pos = pos || {x: 0, y: 0, angle: 0};
             inertia = inertia || {x: 0, y: 0, angle: 0};
+            friction = friction || {x: 0.8, y: 0.8, angle: 0};
 
             var img = new Image();
             // TODO: make sure the image is already loaded before rendering.
@@ -75,6 +79,7 @@ var gl4 = (function() {
                           pos: pos,
                           inertia: inertia,
                           size: size,
+                          friction: friction,
             
                           move: function(speed) {
                               this.pos.x += speed.x || 0;
