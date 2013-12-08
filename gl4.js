@@ -38,6 +38,16 @@ var gl4 = (function() {
         window.requestAnimationFrame(render);
     }
 
+    var mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}};
+    window.onmousemove = function(event) {
+        mouse.inertia.x = event.clientX - mouse.pos.x;
+        mouse.inertia.y = event.clientY - mouse.pos.y;
+
+        mouse.pos.x = event.clientX;
+        mouse.pos.y = event.clientY;
+    }
+    tags['mouse'] = [mouse]
+
     return {
         tags: tags,
 
@@ -97,18 +107,6 @@ var gl4 = (function() {
             running = false;
         }
     };
-})();
-
-var Mouse = (function() {
-    var obj = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}};
-    window.onmousemove = function(event) {
-        obj.inertia.x = event.clientX - obj.pos.x;
-        obj.inertia.y = event.clientY - obj.pos.y;
-
-        obj.pos.x = event.clientX;
-        obj.pos.y = event.clientY;
-    }
-    return obj;
 })();
 
 function move(target, speed) {
