@@ -4,9 +4,11 @@ var gl4 = (function() {
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
 
-    var objects = []
-    var tags = {}
+    var objects = [];
+    var tags = {};
     var frameId = -1;
+
+    var behaviors = [];
 
     canvas.onclick = function() {
         if (intervalId === -1) {
@@ -28,11 +30,27 @@ var gl4 = (function() {
             context.drawImage(object.img, object.x, object.y);
         });
 
+        behaviors.forEach(function(behavior) {
+            if (!tags[behavior.tag]) {
+                return;
+            }
+
+            tags[behavior.tag].forEach(behavior.func);
+        });
+
         frameId = window.requestAnimationFrame(render);
     }
 
     return {
         tags: tags,
+
+        tagged: function(tag) {
+            return tags[tag] || [];
+        },
+
+        register: function(tag, func) {
+            behaviors.push({tag: tag, func: func});
+        },
 
         create: function(imageSource, x, y, objTags, inertia) {
             inertia = inertia || {x: 0, y: 0};
@@ -62,6 +80,15 @@ var gl4 = (function() {
     };
 })();
 
-gl4.create('star.png', 0, 0, ['star'], {x: 1, y: 0});
+function push(target, acceleration) {
+    gl4.register(target, function(object) {
+        object.inertia.x += acceleration.x;
+        object.inertia.y += acceleration.y;
+    });
+}
+
+gl4.create('star.png', 0, 0, ['star']);
 gl4.start();
+
+push('star', {x: 0.1, y: 0.01})
 
