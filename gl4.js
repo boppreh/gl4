@@ -76,6 +76,15 @@ var gl4 = (function() {
     };
 })();
 
+var Mouse = {pos: {x: 0, y: 0}, inertia: {x: 0, y: 0}};
+window.onmousemove = function(event) {
+    Mouse.inertia.x = event.clientX - Mouse.pos.x;
+    Mouse.inertia.y = event.clientY - Mouse.pos.y;
+
+    Mouse.pos.x = event.clientX;
+    Mouse.pos.y = event.clientY;
+}
+
 function push(target, acceleration) {
     gl4.register(target, function(object) {
         object.inertia.x += acceleration.x;
