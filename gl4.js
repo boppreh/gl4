@@ -17,12 +17,17 @@ var gl4 = (function () {
         fps = 0,
         debug = false;
 
+    context.textAlign = "right"
+    context.font = "bold 16px Verdana"
+
     function updateFps() {
         var currentLoop = new Date;
         var timeDif = currentLoop - lastLoop;
         lastLoop = currentLoop;
         frameTime += (timeDif - frameTime) / FRAME_TIME_FILTER;
         fps = (1000 / frameTime).toFixed(1);
+
+        context.fillText(fps + " fps", canvas.width, 20);
     }
 
     function run() {
@@ -36,8 +41,6 @@ var gl4 = (function () {
 
         if (debug) {
             updateFps();
-            context.font = "bold 16px Verdana"
-            context.fillText(fps + " fps", 10, 20);
         }
 
         window.requestAnimationFrame(run);
@@ -115,10 +118,6 @@ var gl4 = (function () {
     };
 
     return {
-        getFps: function () {
-            return fps;
-        },
-
         isRunning: function () {
             return running;
         },
