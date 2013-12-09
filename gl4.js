@@ -127,9 +127,9 @@ function push(target, acceleration) {
 }
 
 function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
-    force = force !== 'undefined' ? force : 5;
-    turningSpeed = turningSpeed !== 'undefined' ? turningSpeed : 30;
-    maxTolerableDistance = maxTolerableDistance !== 'undefined' ? maxTolerableDistance : 10;
+    force = force !== undefined ? force : 5;
+    turningSpeed = turningSpeed !== undefined ? turningSpeed : 30;
+    maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
 
     function findAngle(currentAngle, difX, difY) {
         var angle = Math.atan2(difY, difX);
@@ -160,7 +160,7 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
             if (difX * difX + difY * difY <= maxTolerableDistance) {
                 return;
             }
-
+            
             if (force) {
                 var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY),
                     f = Math.abs(force);
