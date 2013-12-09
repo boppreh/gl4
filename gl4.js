@@ -70,28 +70,28 @@ var gl4 = (function () {
             var img = new Image();
             // TODO: make sure the image is already loaded before rendering.
             img.src = imageSource;
-            var size = {width: img.width, height: img.height};
 
-            var object = {
-                img: img,
-                tags: tags,
-                pos: pos,
-                inertia: inertia,
-                size: size,
-                friction: friction,
+            var size = {width: img.width, height: img.height},
+                object = {
+                    img: img,
+                    tags: tags,
+                    pos: pos,
+                    inertia: inertia,
+                    size: size,
+                    friction: friction,
 
-                move: function (speed) {
-                    this.pos.x += speed.x || 0;
-                    this.pos.y += speed.y || 0;
-                    this.pos.angle += speed.angle || 0;
-                },
+                    move: function (speed) {
+                        this.pos.x += speed.x || 0;
+                        this.pos.y += speed.y || 0;
+                        this.pos.angle += speed.angle || 0;
+                    },
 
-                push: function (acceleration) {
-                    this.inertia.x += acceleration.x || 0;
-                    this.inertia.y += acceleration.y || 0;
-                    this.inertia.angle += acceleration.angle || 0;
-                }
-            };
+                    push: function (acceleration) {
+                        this.inertia.x += acceleration.x || 0;
+                        this.inertia.y += acceleration.y || 0;
+                        this.inertia.angle += acceleration.angle || 0;
+                    }
+                };
 
             objects.push(object);
             objTags.forEach(function (tag) {
@@ -127,9 +127,9 @@ function push(target, acceleration) {
 }
 
 function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
-    force = typeof force !== 'undefined' ? force : 5;
-    turningSpeed = typeof turningSpeed !== 'undefined' ? turningSpeed : 30;
-    maxTolerableDistance = typeof maxTolerableDistance !== 'undefined' ? maxTolerableDistance : 10;
+    force = force !== 'undefined' ? force : 5;
+    turningSpeed = turningSpeed !== 'undefined' ? turningSpeed : 30;
+    maxTolerableDistance = maxTolerableDistance !== 'undefined' ? maxTolerableDistance : 10;
 
     function findAngle(currentAngle, difX, difY) {
         var angle = Math.atan2(difY, difX);
@@ -144,30 +144,28 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
             totalAngularDifference += Math.PI * 2;
         }
 
-        if (Math.abs(totalAngularDifference) > turningSpeed) {
-            return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
-        } else {
+        if (Math.abs(totalAngularDifference) <= turningSpeed) {
             return angle;
         }
+
+        return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
     }
 
     gl4.register(objTag, function (object) {
         gl4.tagged(targetTag).forEach(function (target) {
 
-            var difX = target.pos.x - object.pos.x;
-            var difY = target.pos.y - object.pos.y;
+            var difX = target.pos.x - object.pos.x,
+                difY = target.pos.y - object.pos.y;
 
             if (difX * difX + difY * difY <= maxTolerableDistance) {
                 return;
             }
 
             if (force) {
-                var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY);
-                var f = Math.abs(force);
-                object.push({
-                    x: Math.cos(angle) * f,
-                    y: Math.sin(angle) * f
-                });
+                var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY),
+                    f = Math.abs(force);
+
+                object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
             } else {
                 object.pos.angle = findAngle(object.angle, difX, difY);
             }
