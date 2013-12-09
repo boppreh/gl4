@@ -1,6 +1,8 @@
 "use strict";
 
 var gl4 = (function () {
+    var FRAME_TIME_FILTER = 20,
+        MOTION_BLUR_STRENGTH = 0.8;
     var canvas = document.getElementById("canvas"),
         context = canvas.getContext("2d"),
         running = false,
@@ -32,12 +34,16 @@ var gl4 = (function () {
     }
 
     function step() {
-        //context.clearRect(0, 0, canvas.width, canvas.height);
-        context.save();
-        context.globalAlpha = 0.01;
-        context.fillStyle = "#FFF";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.restore();
+        var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
+            n = canvasData.data.length / 4,
+            motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
+
+        for (var i = 0; i < n; i++) {
+            canvasData.data[i * 4 + 0] += motionBlurDif;
+            canvasData.data[i * 4 + 1] += motionBlurDif;
+            canvasData.data[i * 4 + 2] += motionBlurDif;
+        }
+        context.putImageData(canvasData, 0, 0);
 
         objects.forEach(function (object) {
             object.move(object.inertia);
