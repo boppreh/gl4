@@ -3,6 +3,7 @@
 var gl4 = (function () {
     var FRAME_TIME_FILTER = 20,
         MOTION_BLUR_STRENGTH = 0.8;
+
     var canvas = document.getElementById("canvas"),
         context = canvas.getContext("2d"),
         running = false,
@@ -33,6 +34,33 @@ var gl4 = (function () {
         window.requestAnimationFrame(run);
     }
 
+    function runBehavior(behavior) {
+        var tagged = tags[behavior.tags[0]];
+
+        if (behavior.tags.length === 1) {
+            if (!tags[behavior.tags[0]]) {
+                return;
+            }
+
+            for (var i in tagged) {
+                behavior.func(tagged[i]);
+            }
+
+        } else if (behavior.tags.length === 2) {
+            if (!tags[behavior.tags[0]] && !tags[behavior.tags[1]]) {
+                return;
+            }
+
+            var tagged2 = tags[behavior.tags[1]];
+            for (var i in tagged) {
+                for (var j in tagged2) {
+                    behavior.func(tagged[i], tagged2[j]);
+                }
+            }
+
+        }
+    }
+
     function step() {
         var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
             n = canvasData.data.length / 4,
@@ -58,13 +86,7 @@ var gl4 = (function () {
             context.restore();
         });
 
-        behaviors.forEach(function (behavior) {
-            if (!tags[behavior.tag]) {
-                return;
-            }
-
-            tags[behavior.tag].forEach(behavior.func);
-        });
+        behaviors.forEach(runBehavior);
     }
 
     window.onmousemove = function (event) {
@@ -88,8 +110,11 @@ var gl4 = (function () {
             return tags[tag] || [];
         },
 
-        register: function (tag, func) {
-            behaviors.push({tag: tag, func: func});
+        register: function (tags, func) {
+            if (tags.length !== 1 && tags.length !== 2) {
+                console.error("Behavior must have exactly one or two declared tags.", tags);
+            }
+            behaviors.push({tags: tags, func: func});
         },
 
         create: function (imageSource, objTags, pos, inertia, friction) {
@@ -142,13 +167,13 @@ var gl4 = (function () {
 }());
 
 function move(target, speed) {
-    gl4.register(target, function (object) {
+    gl4.register([target], function (object) {
         object.move(speed);
     });
 }
 
 function push(target, acceleration) {
-    gl4.register(target, function (object) {
+    gl4.register([target], function (object) {
         object.push(acceleration);
     });
 }
@@ -178,25 +203,22 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
         return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
     }
 
-    gl4.register(objTag, function (object) {
-        gl4.tagged(targetTag).forEach(function (target) {
+    gl4.register([objTag, targetTag], function (object, target) {
+        var difX = target.pos.x - object.pos.x,
+            difY = target.pos.y - object.pos.y;
 
-            var difX = target.pos.x - object.pos.x,
-                difY = target.pos.y - object.pos.y;
+        if (difX * difX + difY * difY <= maxTolerableDistance) {
+            return;
+        }
+        
+        if (force) {
+            var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY),
+                f = Math.abs(force);
 
-            if (difX * difX + difY * difY <= maxTolerableDistance) {
-                return;
-            }
-            
-            if (force) {
-                var angle = findAngle(Math.atan2(object.inertia.y, object.inertia.x), difX, difY),
-                    f = Math.abs(force);
-
-                object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
-            } else {
-                object.pos.angle = findAngle(object.angle, difX, difY);
-            }
-        });
+            object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
+        } else {
+            object.pos.angle = findAngle(object.angle, difX, difY);
+        }
     });
 }
 
