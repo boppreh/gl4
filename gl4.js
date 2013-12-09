@@ -5,24 +5,13 @@ var gl4 = (function () {
         context = canvas.getContext("2d"),
         running = false,
         objects = [],
-        mouse = {
-            pos: {
-                x: 0,
-                y: 0,
-                angle: 0
-            },
-            inertia: {
-                x: 0,
-                y: 0,
-                angle: 0
-            }
-        },
+        mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}},
         tags = {"mouse": [mouse]},
         behaviors = [];
 
     function render() {
         if (!running) {
-            return
+            return;
         }
 
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -56,7 +45,7 @@ var gl4 = (function () {
 
         mouse.pos.x = event.clientX;
         mouse.pos.y = event.clientY;
-    }
+    };
 
     return {
         tags: tags,
@@ -70,36 +59,18 @@ var gl4 = (function () {
         },
 
         register: function (tag, func) {
-            behaviors.push({
-                tag: tag,
-                func: func
-            });
+            behaviors.push({tag: tag, func: func});
         },
 
         create: function (imageSource, objTags, pos, inertia, friction) {
-            pos = pos || {
-                x: 0,
-                y: 0,
-                angle: 0
-            };
-            inertia = inertia || {
-                x: 0,
-                y: 0,
-                angle: 0
-            };
-            friction = friction || {
-                x: 0.8,
-                y: 0.8,
-                angle: 0
-            };
+            pos = pos || {x: 0, y: 0, angle: 0};
+            inertia = inertia || { x: 0, y: 0, angle: 0};
+            friction = friction || {x: 0.8, y: 0.8, angle: 0};
 
             var img = new Image();
             // TODO: make sure the image is already loaded before rendering.
             img.src = imageSource;
-            var size = {
-                width: img.width,
-                height: img.height
-            }
+            var size = {width: img.width, height: img.height};
 
             var object = {
                 img: img,
@@ -141,7 +112,7 @@ var gl4 = (function () {
             running = false;
         }
     };
-})();
+}());
 
 function move(target, speed) {
     gl4.register(target, function (object) {
@@ -168,9 +139,9 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
 
         var totalAngularDifference = angle - currentAngle;
         if (totalAngularDifference > Math.PI) {
-            totalAngularDifference -= Math.PI * 2
+            totalAngularDifference -= Math.PI * 2;
         } else if (totalAngularDifference < -Math.PI) {
-            totalAngularDifference += Math.PI * 2
+            totalAngularDifference += Math.PI * 2;
         }
 
         if (Math.abs(totalAngularDifference) > turningSpeed) {
