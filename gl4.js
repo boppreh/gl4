@@ -1,7 +1,7 @@
 "use strict";
 
 var gl4 = (function () {
-    var FRAME_TIME_FILTER = 20,
+    var FRAME_TIME_FILTER = 10,
         MOTION_BLUR_STRENGTH = 0.8;
 
     var canvas = document.getElementById("canvas"),
@@ -14,7 +14,16 @@ var gl4 = (function () {
         nLoading = 0,
         frameTime = 0,
         lastLoop = new Date,
-        fps = 0;
+        fps = 0,
+        debug = false;
+
+    function updateFps() {
+        var currentLoop = new Date;
+        var timeDif = currentLoop - lastLoop;
+        lastLoop = currentLoop;
+        frameTime += (timeDif - frameTime) / FRAME_TIME_FILTER;
+        fps = (1000 / frameTime).toFixed(1);
+    }
 
     function run() {
         if (!running) {
@@ -25,11 +34,11 @@ var gl4 = (function () {
             step();
         }
 
-        var currentLoop = new Date;
-        var timeDif = currentLoop - lastLoop;
-        lastLoop = currentLoop;
-        frameTime += (timeDif - frameTime) / 20;
-        fps = (1000 / frameTime).toFixed(1)
+        if (debug) {
+            updateFps();
+            context.font = "bold 16px Verdana"
+            context.fillText(fps + " fps", 10, 20);
+        }
 
         window.requestAnimationFrame(run);
     }
@@ -155,7 +164,9 @@ var gl4 = (function () {
             });
         },
 
-        start: function () {
+        start: function (debugMode) {
+            debug = debugMode || false;
+
             window.requestAnimationFrame(run);
             running = true;
         },
@@ -222,4 +233,4 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
     });
 }
 
-gl4.start();
+gl4.start(true);
