@@ -8,7 +8,10 @@ var gl4 = (function () {
         mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}},
         tags = {"mouse": [mouse]},
         behaviors = [],
-        nLoading = 0;
+        nLoading = 0,
+        frameTime = 0,
+        lastLoop = new Date,
+        fps = 0;
 
     function run() {
         if (!running) {
@@ -19,11 +22,18 @@ var gl4 = (function () {
             step();
         }
 
+        var currentLoop = new Date;
+        var timeDif = currentLoop - lastLoop;
+        lastLoop = currentLoop;
+        frameTime += (timeDif - frameTime) / 20;
+        fps = (1000 / frameTime).toFixed(1)
+
         window.requestAnimationFrame(run);
     }
 
     function step() {
         context.clearRect(0, 0, canvas.width, canvas.height);
+
         objects.forEach(function (object) {
             object.move(object.inertia);
             object.inertia.x *= (1 - object.friction.x);
@@ -55,7 +65,9 @@ var gl4 = (function () {
     };
 
     return {
-        tags: tags,
+        getFps: function () {
+            return fps;
+        },
 
         isRunning: function () {
             return running;
