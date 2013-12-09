@@ -32,7 +32,12 @@ var gl4 = (function () {
     }
 
     function step() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        //context.clearRect(0, 0, canvas.width, canvas.height);
+        context.save();
+        context.globalAlpha = 0.01;
+        context.fillStyle = "#FFF";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.restore();
 
         objects.forEach(function (object) {
             object.move(object.inertia);
