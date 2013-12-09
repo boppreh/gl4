@@ -7,13 +7,22 @@ var gl4 = (function () {
         objects = [],
         mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}},
         tags = {"mouse": [mouse]},
-        behaviors = [];
+        behaviors = [],
+        nLoading = 0;
 
-    function render() {
+    function run() {
         if (!running) {
             return;
         }
 
+        if (nLoading === 0) {
+            step();
+        }
+
+        window.requestAnimationFrame(run);
+    }
+
+    function step() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         objects.forEach(function (object) {
             object.move(object.inertia);
@@ -35,8 +44,6 @@ var gl4 = (function () {
 
             tags[behavior.tag].forEach(behavior.func);
         });
-
-        window.requestAnimationFrame(render);
     }
 
     window.onmousemove = function (event) {
@@ -63,48 +70,45 @@ var gl4 = (function () {
         },
 
         create: function (imageSource, objTags, pos, inertia, friction) {
-            pos = pos || {x: 0, y: 0, angle: 0};
-            inertia = inertia || { x: 0, y: 0, angle: 0};
-            friction = friction || {x: 0.8, y: 0.8, angle: 0};
+            var obj = {
+                tags: objTags,
+                pos: pos || {x: 0, y: 0, angle: 0},
+                inertia: inertia || { x: 0, y: 0, angle: 0},
+                friction: friction || {x: 0.8, y: 0.8, angle: 0},
+                img: new Image(),
 
-            var img = new Image();
-            // TODO: make sure the image is already loaded before rendering.
-            img.src = imageSource;
+                move: function (speed) {
+                    this.pos.x += speed.x || 0;
+                    this.pos.y += speed.y || 0;
+                    this.pos.angle += speed.angle || 0;
+                },
 
-            var size = {width: img.width, height: img.height},
-                object = {
-                    img: img,
-                    tags: tags,
-                    pos: pos,
-                    inertia: inertia,
-                    size: size,
-                    friction: friction,
+                push: function (acceleration) {
+                    this.inertia.x += acceleration.x || 0;
+                    this.inertia.y += acceleration.y || 0;
+                    this.inertia.angle += acceleration.angle || 0;
+                }
+            };
 
-                    move: function (speed) {
-                        this.pos.x += speed.x || 0;
-                        this.pos.y += speed.y || 0;
-                        this.pos.angle += speed.angle || 0;
-                    },
+            nLoading++;
+            obj.img.onload = function () {
+                nLoading--;
+                obj.size = {width: obj.img.width, height: obj.img.height}
+            };
+            obj.img.src = imageSource;
 
-                    push: function (acceleration) {
-                        this.inertia.x += acceleration.x || 0;
-                        this.inertia.y += acceleration.y || 0;
-                        this.inertia.angle += acceleration.angle || 0;
-                    }
-                };
-
-            objects.push(object);
+            objects.push(obj);
             objTags.forEach(function (tag) {
                 if (tags[tag] === undefined) {
-                    tags[tag] = [object];
+                    tags[tag] = [obj];
                 } else {
-                    tags[tag].push(object);
+                    tags[tag].push(obj);
                 }
             });
         },
 
         start: function () {
-            window.requestAnimationFrame(render);
+            window.requestAnimationFrame(run);
             running = true;
         },
 
