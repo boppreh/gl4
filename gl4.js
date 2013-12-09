@@ -29,6 +29,7 @@ var gl4 = (function () {
         fps = (1000 / frameTime).toFixed(1);
 
         context.fillText(fps + " fps", canvas.width, 20);
+        context.fillText(objects.length + " objects", canvas.width, 36);
     }
 
     function run() {
@@ -47,10 +48,30 @@ var gl4 = (function () {
         window.requestAnimationFrame(run);
     }
 
+    function clearCanvas() {
+        if (MOTION_BLUR_STRENGTH === 0) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        } else {
+            var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
+                n = canvasData.data.length / 4,
+                motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
+
+            for (var i = 0; i < n; i++) {
+                canvasData.data[i * 4 + 0] += motionBlurDif;
+                canvasData.data[i * 4 + 1] += motionBlurDif;
+                canvasData.data[i * 4 + 2] += motionBlurDif;
+            }
+            context.putImageData(canvasData, 0, 0);
+        }
+    }
+
     function runBehavior(behavior) {
         var tagged = tags[behavior.tags[0]];
 
-        if (behavior.tags.length === 1) {
+        if (behavior.tags.length === 0) {
+            behavior.func();
+
+        } else if (behavior.tags.length === 1) {
             if (!tags[behavior.tags[0]]) {
                 return;
             }
@@ -70,24 +91,6 @@ var gl4 = (function () {
                     behavior.func(tagged[i], tagged2[j]);
                 }
             }
-
-        }
-    }
-
-    function clearCanvas() {
-        if (MOTION_BLUR_STRENGTH === 0) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-        } else {
-            var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
-                n = canvasData.data.length / 4,
-                motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
-
-            for (var i = 0; i < n; i++) {
-                canvasData.data[i * 4 + 0] += motionBlurDif;
-                canvasData.data[i * 4 + 1] += motionBlurDif;
-                canvasData.data[i * 4 + 2] += motionBlurDif;
-            }
-            context.putImageData(canvasData, 0, 0);
         }
     }
 
@@ -134,8 +137,13 @@ var gl4 = (function () {
         },
 
         register: function (tags, func) {
-            if (tags.length !== 1 && tags.length !== 2) {
-                console.error("Behavior must have exactly one or two declared tags.", tags);
+            if (func === undefined) {
+                func = tags;
+                tags = [];
+            }
+
+            if (tags.length > 2) {
+                console.error("Behavior must have two or less declared tags.", tags);
             }
             behaviors.push({tags: tags, func: func});
         },
@@ -179,7 +187,7 @@ var gl4 = (function () {
         },
 
         start: function (debugMode) {
-            debug = debugMode || false;
+            debug = debugMode || debug;
 
             window.requestAnimationFrame(run);
             running = true;
@@ -244,6 +252,21 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
         } else {
             object.pos.angle = findAngle(object.angle, difX, difY);
         }
+    });
+}
+
+function create(img, tags, pos, inertia, friction) {
+    pos = pos || {};
+    inertia = inertia || {};
+    friction = friction || {x: 0.8, y: 0.8, angle: 0};
+
+    // Clones a {x, y, angle} triple to avoid mutating the same object.
+    function c(triple) {
+        return {x: triple.x || 0, y: triple.y || 0, angle: triple.angle || 0};
+    }
+
+    gl4.register(function () {
+        gl4.create(img, tags.slice(), c(pos), c(inertia), c(friction));
     });
 }
 
