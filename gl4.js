@@ -10,12 +10,14 @@ var gl4 = (function () {
         objects = [],
         mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}},
         tags = {"mouse": [mouse]},
-        behaviors = [],
+        behaviors = {},
         nLoading = 0,
         frameTime = 0,
         lastLoop = new Date,
         fps = 0,
-        debug = false;
+        debug = false,
+        mouseDown = false,
+        behaviorCount = 0;
 
     context.textAlign = "right"
     context.fillStyle = "green";
@@ -116,7 +118,10 @@ var gl4 = (function () {
     function step() {
         clearCanvas();
         objects.forEach(stepObject);
-        behaviors.forEach(runBehavior);
+
+        for (var id in behaviors) {
+            runBehavior(behaviors[id]);
+        }
     }
 
     window.onmousemove = function (event) {
@@ -127,7 +132,19 @@ var gl4 = (function () {
         mouse.pos.y = event.clientY;
     };
 
+    window.onmousedown = function (event) {
+        mouseDown = true;
+    };
+
+    window.onmouseup = function (event) {
+        mouseDown = false;
+    };
+
     return {
+        isMouseDown: function () {
+            return mouseDown;
+        },
+
         isRunning: function () {
             return running;
         },
@@ -145,7 +162,15 @@ var gl4 = (function () {
             if (tags.length > 2) {
                 console.error("Behavior must have two or less declared tags.", tags);
             }
-            behaviors.push({tags: tags, func: func});
+
+            var behavior = {id: behaviorCount++, tags: tags, func: func};
+            behaviors[behavior.id] = behavior;
+
+            return behavior;
+        },
+
+        unregister: function (behavior) {
+            delete behaviors[behavior.id];
         },
 
         create: function (imageSource, objTags, pos, inertia, friction) {
@@ -195,18 +220,20 @@ var gl4 = (function () {
 
         stop: function () {
             running = false;
-        }
+        },
+
+        runBehavior: runBehavior
     };
 }());
 
 function move(target, speed) {
-    gl4.register([target], function (object) {
+    return gl4.register([target], function (object) {
         object.move(speed);
     });
 }
 
 function push(target, acceleration) {
-    gl4.register([target], function (object) {
+    return gl4.register([target], function (object) {
         object.push(acceleration);
     });
 }
@@ -236,7 +263,7 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
         return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
     }
 
-    gl4.register([objTag, targetTag], function (object, target) {
+    return gl4.register([objTag, targetTag], function (object, target) {
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y;
 
@@ -265,8 +292,18 @@ function create(img, tags, pos, inertia, friction) {
         return {x: triple.x || 0, y: triple.y || 0, angle: triple.angle || 0};
     }
 
-    gl4.register(function () {
+    return gl4.register(function () {
         gl4.create(img, tags.slice(), c(pos), c(inertia), c(friction));
+    });
+}
+
+function onMouseDown(behavior) {
+    gl4.unregister(behavior);
+
+    gl4.register(function () {
+        if (gl4.isMouseDown()) {
+            gl4.runBehavior(behavior);
+        }
     });
 }
 
