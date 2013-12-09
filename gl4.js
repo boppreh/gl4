@@ -1,15 +1,24 @@
 "use strict";
 
 var gl4 = (function () {
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-
-    var running = false;
-
-    var objects = [];
-    var tags = {};
-
-    var behaviors = [];
+    var canvas = document.getElementById("canvas"),
+        context = canvas.getContext("2d"),
+        running = false,
+        objects = [],
+        mouse = {
+            pos: {
+                x: 0,
+                y: 0,
+                angle: 0
+            },
+            inertia: {
+                x: 0,
+                y: 0,
+                angle: 0
+            }
+        },
+        tags = {"mouse": [mouse]},
+        behaviors = [];
 
     function render() {
         if (!running) {
@@ -41,18 +50,6 @@ var gl4 = (function () {
         window.requestAnimationFrame(render);
     }
 
-    var mouse = {
-        pos: {
-            x: 0,
-            y: 0,
-            angle: 0
-        },
-        inertia: {
-            x: 0,
-            y: 0,
-            angle: 0
-        }
-    };
     window.onmousemove = function (event) {
         mouse.inertia.x = event.clientX - mouse.pos.x;
         mouse.inertia.y = event.clientY - mouse.pos.y;
@@ -60,7 +57,6 @@ var gl4 = (function () {
         mouse.pos.x = event.clientX;
         mouse.pos.y = event.clientY;
     }
-    tags['mouse'] = [mouse]
 
     return {
         tags: tags,
