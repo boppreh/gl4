@@ -70,31 +70,39 @@ var gl4 = (function () {
         }
     }
 
-    function step() {
-        var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
-            n = canvasData.data.length / 4,
-            motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
+    function clearCanvas() {
+        if (MOTION_BLUR_STRENGTH === 0) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        } else {
+            var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
+                n = canvasData.data.length / 4,
+                motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
 
-        for (var i = 0; i < n; i++) {
-            canvasData.data[i * 4 + 0] += motionBlurDif;
-            canvasData.data[i * 4 + 1] += motionBlurDif;
-            canvasData.data[i * 4 + 2] += motionBlurDif;
+            for (var i = 0; i < n; i++) {
+                canvasData.data[i * 4 + 0] += motionBlurDif;
+                canvasData.data[i * 4 + 1] += motionBlurDif;
+                canvasData.data[i * 4 + 2] += motionBlurDif;
+            }
+            context.putImageData(canvasData, 0, 0);
         }
-        context.putImageData(canvasData, 0, 0);
+    }
 
-        objects.forEach(function (object) {
-            object.move(object.inertia);
-            object.inertia.x *= (1 - object.friction.x);
-            object.inertia.y *= (1 - object.friction.y);
-            object.inertia.angle *= (1 - object.friction.angle);
+    function stepObject(object) {
+        object.move(object.inertia);
+        object.inertia.x *= (1 - object.friction.x);
+        object.inertia.y *= (1 - object.friction.y);
+        object.inertia.angle *= (1 - object.friction.angle);
 
-            context.save();
-            context.translate(object.pos.x, object.pos.y);
-            context.rotate(object.pos.angle);
-            context.drawImage(object.img, -object.size.width / 2, -object.size.height / 2);
-            context.restore();
-        });
+        context.save();
+        context.translate(object.pos.x, object.pos.y);
+        context.rotate(object.pos.angle);
+        context.drawImage(object.img, -object.size.width / 2, -object.size.height / 2);
+        context.restore();
+    }
 
+    function step() {
+        clearCanvas();
+        objects.forEach(stepObject);
         behaviors.forEach(runBehavior);
     }
 
