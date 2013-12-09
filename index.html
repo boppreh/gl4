@@ -16,8 +16,10 @@
 gl4.create("star.png", ["star"], {x: 100, y: 100, angle: Math.PI}, null);
 
 follow("star", "mouse");
+follow("star", "star", -1);
 move("star", {angle: 0.1})
 onMouseDown(create("star.png", ["star"]));
+wrap("star");
         </script>
     </body>
 </html>

@@ -267,7 +267,7 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y;
 
-        if (difX * difX + difY * difY <= maxTolerableDistance) {
+        if (difX * difX + difY * difY <= maxTolerableDistance * maxTolerableDistance) {
             return;
         }
         
@@ -303,6 +303,33 @@ function onMouseDown(behavior) {
     gl4.register(function () {
         if (gl4.isMouseDown()) {
             gl4.runBehavior(behavior);
+        }
+    });
+}
+
+function wrap(target, start, end) {
+    if (end === undefined && start !== undefined) {
+        end = start;
+        start = undefined;
+    }
+
+    start = start || {x: 0, y: 0};
+    end = end || {x: canvas.width, y: canvas.height};
+    var size = {x: end.x - start.x, y: end.y - start.y};
+
+    return gl4.register([target], function (object) {
+        var pos = object.pos;
+
+        if (pos.x < start.x) {
+            pos.x += size.x;
+        } else if (pos.x > end.x) {
+            pos.x -= size.x;
+        }
+
+        if (pos.y < start.y) {
+            pos.y += size.y;
+        } else if (pos.y > end.y) {
+            pos.y -= size.y;
         }
     });
 }
