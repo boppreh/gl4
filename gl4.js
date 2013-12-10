@@ -429,4 +429,31 @@ function onHit(object, target, behavior) {
     });
 }
 
+/**
+ * Returns an object with randomized attributes, between the given min and max
+ * dictionary values. The attributes are re-randomized every frame.
+ */
+function r(minValues, maxValues) {
+    var obj = {};
+
+    function update() {
+        for (var property in minValues) {
+            var min = minValues[property];
+            var max = maxValues[property];
+
+            if (max === undefined) {
+                obj[property] = min;
+                continue;
+            }
+
+            obj[property] = Math.random() * (max - min) + min;
+        }
+    }
+
+    gl4.register(update);
+    update();
+
+    return obj;
+}
+
 gl4.start(true);
