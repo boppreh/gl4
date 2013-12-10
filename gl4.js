@@ -115,7 +115,7 @@ var gl4 = (function () {
 
         context.save();
         context.translate(object.pos.x, object.pos.y);
-        context.rotate(object.pos.angle);
+        context.rotate(-object.pos.angle);
         context.drawImage(object.img, -object.size.x / 2, -object.size.y / 2);
         context.restore();
 
@@ -524,7 +524,6 @@ function shoot(origin, imgSource, tags, force, friction) {
     return gl4.register(origin, function (object) {
         var angle = object.pos.angle;
         var inertia = {x: Math.cos(angle) * force, y: Math.sin(angle) * force};
-        console.log(inertia);
         gl4.create(imgSource, tags, object.pos, inertia, friction);
     });
 }
