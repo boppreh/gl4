@@ -141,16 +141,21 @@ var gl4 = (function () {
         objects.forEach(stepObject);
     }
 
-    window.onmousemove = function (event) {
+    window.addEventListener("mousemove", function (event) {
         mouse.inertia.x = event.clientX - mouse.pos.x;
         mouse.inertia.y = event.clientY - mouse.pos.y;
 
         mouse.pos.x = event.clientX;
         mouse.pos.y = event.clientY;
-    };
+    }, false);
 
-    window.onmousedown = function (event) { mouse.isDown = true; };
-    window.onmouseup = function (event) { mouse.isDown = false; };
+    window.addEventListener("mousedown", function (event) {
+        mouse.isDown = true;
+    }, false);
+
+    window.addEventListener("mouseup", function (event) {
+        mouse.isDown = false;
+    }, false);
 
     return {
         mouse: mouse,
