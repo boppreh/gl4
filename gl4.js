@@ -54,16 +54,11 @@ var gl4 = (function () {
         if (MOTION_BLUR_STRENGTH === 0) {
             context.clearRect(0, 0, canvas.width, canvas.height);
         } else {
-            var canvasData = context.getImageData(0, 0, canvas.width, canvas.height),
-                n = canvasData.data.length / 4,
-                motionBlurDif = 255 * (1 - MOTION_BLUR_STRENGTH);
-
-            for (var i = 0; i < n; i++) {
-                canvasData.data[i * 4 + 0] += motionBlurDif;
-                canvasData.data[i * 4 + 1] += motionBlurDif;
-                canvasData.data[i * 4 + 2] += motionBlurDif;
-            }
-            context.putImageData(canvasData, 0, 0);
+            context.save();
+            context.fillStyle = "rgba(0, 0, 0, " + (1 - MOTION_BLUR_STRENGTH) + ")";
+            context.globalCompositeOperation = "destination-out";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.restore();
         }
     }
 
