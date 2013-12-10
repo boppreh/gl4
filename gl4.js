@@ -2,7 +2,7 @@
 
 var gl4 = (function () {
     var FRAME_TIME_FILTER = 10,
-        MOTION_BLUR_STRENGTH = 0.8;
+        MOTION_BLUR_STRENGTH = 0.5;
 
     var canvas = document.getElementById("canvas"),
         context = canvas.getContext("2d"),
@@ -55,7 +55,7 @@ var gl4 = (function () {
             context.clearRect(0, 0, canvas.width, canvas.height);
         } else {
             context.save();
-            context.fillStyle = "rgba(0, 0, 0, " + (1 - MOTION_BLUR_STRENGTH) + ")";
+            context.globalAlpha = 1 - MOTION_BLUR_STRENGTH;
             context.globalCompositeOperation = "destination-out";
             context.fillRect(0, 0, canvas.width, canvas.height);
             context.restore();
