@@ -186,7 +186,8 @@ var gl4 = (function () {
         },
 
         /**
-         * `register(func)` or `register([tagsUsed], func)`
+         * `register(func)` or `register(singleTag, func)`,
+         * `register([manyTags], func)`
          *
          * Register a new behavior. `func` is invoked once for every
          * tagged combination of items[1], or once every frame if not tags were
@@ -209,6 +210,8 @@ var gl4 = (function () {
             if (func === undefined) {
                 func = tags;
                 tags = [];
+            } else if (typeof tags === "string") {
+                tags = [tags]
             }
 
             if (tags.length > 2) {
@@ -288,6 +291,9 @@ var gl4 = (function () {
                 });
             };
             obj.img.src = imageSource;
+
+            // Warning! Object has not been completely loaded yet.
+            return obj;
         },
 
         /**
@@ -324,7 +330,7 @@ var gl4 = (function () {
  * regardless and without touching their inertia.
  */
 function move(target, speed) {
-    return gl4.register([target], function (object) {
+    return gl4.register(target, function (object) {
         object.move(speed);
     });
 }
@@ -333,7 +339,7 @@ function move(target, speed) {
  * Accelerate tagged objects.
  */
 function push(target, acceleration) {
-    return gl4.register([target], function (object) {
+    return gl4.register(target, function (object) {
         object.push(acceleration);
     });
 }
@@ -409,7 +415,7 @@ function wrap(target, start, end) {
     end = end || {x: canvas.width, y: canvas.height};
     var size = {x: end.x - start.x, y: end.y - start.y};
 
-    return gl4.register([target], function (object) {
+    return gl4.register(target, function (object) {
         var pos = object.pos;
 
         if (pos.x < start.x) {
