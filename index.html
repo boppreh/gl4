@@ -13,13 +13,14 @@
         <script>
 // window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-gl4.create("star.png", ["star", "main"], {x: 100, y: 100, angle: Math.PI}, null);
+gl4.create("star.png", ["star", "main"], {x: 200, y: 200, angle: Math.PI}, null);
 
-follow("main", "mouse");
-follow("star", "main", -1);
-move("star", {angle: 0.1})
-onMouseDown(create("star.png", ["star"]));
-wrap("star");
+onHit("main", "mouse", move("main", {angle: 0.1}));
+//follow("main", "mouse");
+//follow("star", "main", -1);
+//move("star", {angle: 0.1})
+//onMouseDown(create("star.png", ["star"]));
+//wrap("star");
         </script>
     </body>
 </html>

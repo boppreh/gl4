@@ -8,7 +8,9 @@ var gl4 = (function () {
         context = canvas.getContext("2d"),
         running = false,
         objects = [],
-        mouse = {pos: {x: 0, y: 0, angle: 0}, inertia: {x: 0, y: 0, angle: 0}},
+        mouse = {pos: {x: 0, y: 0, angle: 0},
+                 inertia: {x: 0, y: 0, angle: 0},
+                 size: {x: 0, y: 0}},
         tags = {"mouse": [mouse]},
         behaviors = {},
         nLoading = 0,
@@ -100,13 +102,13 @@ var gl4 = (function () {
         context.save();
         context.translate(object.pos.x, object.pos.y);
         context.rotate(object.pos.angle);
-        context.drawImage(object.img, -object.size.width / 2, -object.size.height / 2);
+        context.drawImage(object.img, -object.size.x / 2, -object.size.y / 2);
         context.restore();
 
         if (debug) {
             for (var i = 0; i < object.tags.length; i++) {
-                var x = object.pos.x + object.size.width / 2,
-                    y = object.pos.y - object.size.height / 2 + i * 16;
+                var x = object.pos.x + object.size.x / 2,
+                    y = object.pos.y - object.size.y / 2 + i * 16;
 
                 context.fillText(object.tags[i], x, y);
             }
@@ -195,7 +197,7 @@ var gl4 = (function () {
             nLoading++;
             obj.img.onload = function () {
                 nLoading--;
-                obj.size = {width: obj.img.width, height: obj.img.height}
+                obj.size = {x: obj.img.width, y: obj.img.height}
             };
             obj.img.src = imageSource;
 
@@ -298,7 +300,7 @@ function create(img, tags, pos, inertia, friction) {
 function onMouseDown(behavior) {
     gl4.unregister(behavior);
 
-    gl4.register(function () {
+    return gl4.register(function () {
         if (gl4.isMouseDown()) {
             gl4.runBehavior(behavior);
         }
@@ -328,6 +330,20 @@ function wrap(target, start, end) {
             pos.y += size.y;
         } else if (pos.y > end.y) {
             pos.y -= size.y;
+        }
+    });
+}
+
+function onHit(object, target, behavior) {
+    gl4.unregister(behavior);
+
+    return gl4.register([object, target], function (object, target) {
+        if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
+              object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
+              object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
+              object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
+
+            gl4.runBehavior(behavior);
         }
     });
 }
