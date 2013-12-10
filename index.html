@@ -13,16 +13,17 @@
         <script>
 window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-gl4.create('star.png', ['star'], {x: 200, y: 200, angle: Math.PI}, null,
-                                 {x: 0.5, y: 0.5, angle: 0.3});
+gl4.create('star.png', ['star'], {x: 200, y: 200}, null,
+                                 {x: 0.01, y: 0.1, angle: 0.3});
 
-var p = push('star', r({x: -500, y: -500, angle: -5},
-                       {x: 500, y: 500, angle: 5}));
-var s = sound('ok.mp3');
-onHit('star', 'mouse', p, s);
-wrap('star');
-
-onPressed('spacebar', push('star', {angle: 20}));
+push('star', {y: 2});
+onHit('star', 'mouse', gl4.register(['star', 'mouse'], function (star, mouse) {
+    var distance = mouse.pos.x - star.pos.x;
+    var direction = distance < 0 ? 1 : -1;
+    star.inertia.x += direction * Math.log(Math.abs(mouse.pos.x - star.pos.x));
+    star.inertia.y -= 20;
+}));
+reflect('star');
         </script>
     </body>
 </html>

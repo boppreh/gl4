@@ -455,6 +455,34 @@ function wrap(target, start, end) {
     });
 }
 
+function reflect(target, start, end) {
+    if (end === undefined && start !== undefined) {
+        end = start;
+        start = undefined;
+    }
+
+    start = start || {x: 0, y: 0};
+    end = end || {x: canvas.width, y: canvas.height};
+    var size = {x: end.x - start.x, y: end.y - start.y};
+
+    return gl4.register(target, function (object) {
+        var pos = object.pos;
+        var inertia = object.inertia;
+
+        if (pos.x < start.x) {
+            inertia.x = Math.abs(inertia.x);
+        } else if (pos.x > end.x) {
+            inertia.x = -Math.abs(inertia.x);
+        }
+
+        if (pos.y < start.y) {
+            inertia.y = Math.abs(inertia.y);
+        } else if (pos.y > end.y) {
+            inertia.y = -Math.abs(inertia.y);
+        }
+    });
+}
+
 /**
  * Runs a behavior while the mouse left button is pressed.
  */
