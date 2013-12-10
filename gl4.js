@@ -244,11 +244,15 @@ var gl4 = (function () {
          * `friction` is a {x, y, angle} dict of the desired initial friction.
          */
         create: function (imageSource, objTags, pos, inertia, friction) {
+            pos = pos || {}
+            inertia = inertia || {}
+            friction = friction || {}
+
             var obj = {
                 tags: objTags,
-                pos: pos || {x: 0, y: 0, angle: 0},
-                inertia: inertia || { x: 0, y: 0, angle: 0},
-                friction: friction || {x: 0.8, y: 0.8, angle: 0},
+                pos: {x: pos.x || 0, y: pos.y || 0, angle: pos.angle || 0},
+                inertia: {x: inertia.x || 0, y: inertia.y || 0, angle: inertia.angle || 0},
+                friction: {x: friction.x || 0.8, y: friction.y || 0.8, angle: friction.angle || 0},
                 img: new Image(),
 
                 move: function (speed) {
