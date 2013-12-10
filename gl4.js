@@ -4,8 +4,8 @@ var gl4 = (function () {
     var FRAME_TIME_FILTER = 10,
         MOTION_BLUR_STRENGTH = 0.5;
 
-    var canvas = document.getElementById("canvas"),
-        context = canvas.getContext("2d"),
+    var canvas = document.getElementById('canvas'),
+        context = canvas.getContext('2d'),
 
         running = false,
         objects = [],
@@ -14,7 +14,7 @@ var gl4 = (function () {
                  inertia: {x: 0, y: 0, angle: 0},
                  size: {x: 0, y: 0},
                  isDown: false},
-        tags = {"mouse": [mouse]},
+        tags = {'mouse': [mouse]},
         // Behaviors use a dictionary for cheap insertion and deletion.
         behaviors = {},
         // Used for generating unique ids for behaviors.
@@ -27,14 +27,16 @@ var gl4 = (function () {
         sounds = {},
         soundsCount = 0,
 
+        pressedKeys = {},
+
         // Used for FPS calculation.
         frameTime = 0,
         lastLoop = new Date,
         fps = 0;
 
-    context.textAlign = "right"
-    context.fillStyle = "green";
-    context.font = "bold 16px Verdana";
+    context.textAlign = 'right'
+    context.fillStyle = 'green';
+    context.font = 'bold 16px Verdana';
 
     function updateFps() {
         var currentLoop = new Date;
@@ -43,8 +45,8 @@ var gl4 = (function () {
         frameTime += (timeDif - frameTime) / FRAME_TIME_FILTER;
         fps = (1000 / frameTime).toFixed(1);
 
-        context.fillText(fps + " fps", canvas.width, 20);
-        context.fillText(objects.length + " objects", canvas.width, 36);
+        context.fillText(fps + ' fps', canvas.width, 20);
+        context.fillText(objects.length + ' objects', canvas.width, 36);
     }
 
     function run() {
@@ -71,7 +73,7 @@ var gl4 = (function () {
         } else {
             context.save();
             context.globalAlpha = 1 - MOTION_BLUR_STRENGTH;
-            context.globalCompositeOperation = "destination-out";
+            context.globalCompositeOperation = 'destination-out';
             context.fillRect(0, 0, canvas.width, canvas.height);
             context.restore();
         }
@@ -141,7 +143,7 @@ var gl4 = (function () {
         objects.forEach(stepObject);
     }
 
-    window.addEventListener("mousemove", function (event) {
+    window.addEventListener('mousemove', function (event) {
         mouse.inertia.x = event.clientX - mouse.pos.x;
         mouse.inertia.y = event.clientY - mouse.pos.y;
 
@@ -149,12 +151,24 @@ var gl4 = (function () {
         mouse.pos.y = event.clientY;
     }, false);
 
-    window.addEventListener("mousedown", function (event) {
+    window.addEventListener('mousedown', function (event) {
         mouse.isDown = true;
     }, false);
 
-    window.addEventListener("mouseup", function (event) {
+    window.addEventListener('mouseup', function (event) {
         mouse.isDown = false;
+    }, false);
+
+    window.addEventListener('keydown', function (event) {
+        // Regular keycode.
+        pressedKeys[event.which] = true;
+        // String representation (e.g. 'spacebar', 'enter').
+        pressedKeys[event.key.toLowerCase()] = true;
+    }, false);
+
+    window.addEventListener('keyup', function (event) {
+        delete pressedKeys[event.which];
+        delete pressedKeys[event.key.toLowerCase()];
     }, false);
 
     return {
@@ -163,6 +177,10 @@ var gl4 = (function () {
         isRunning: function () {
             return running;
         },
+
+        isPressed: function(key) {
+           return pressedKeys[key] !== undefined;
+       },
 
         tagged: function (tag) {
             return tags[tag] || [];
@@ -181,7 +199,7 @@ var gl4 = (function () {
          * No more than 2 tags must be used.
          *
          * [1]
-         *   register(["bullet", "ship"], func);
+         *   register(['bullet', 'ship'], func);
          *
          *   func(bullet1, ship1);
          *   func(bullet2, ship1);
@@ -195,7 +213,7 @@ var gl4 = (function () {
             }
 
             if (tags.length > 2) {
-                console.error("Behavior must have two or less declared tags.", tags);
+                console.error('Behavior must have two or less declared tags.', tags);
             }
 
             var behavior = {id: behaviorCount++,
@@ -289,7 +307,7 @@ var gl4 = (function () {
         stop: function () {
             running = false;
             if (debug) {
-                context.fillText("PAUSED", canvas.width, 52);
+                context.fillText('PAUSED', canvas.width, 52);
             }
         },
     };
@@ -418,6 +436,19 @@ function onMouseDown(behavior) {
 
     return gl4.register(function () {
         if (gl4.isMouseDown()) {
+            behavior.run();
+        }
+    });
+}
+
+/**
+ * Runs a behavior while a given key is pressed.
+ */
+function onPressed(key, behavior) {
+    gl4.unregister(behavior);
+
+    return gl4.register(function () {
+        if (gl4.isPressed(key)) {
             behavior.run();
         }
     });
