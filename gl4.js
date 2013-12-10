@@ -517,4 +517,16 @@ function r(minValues, maxValues) {
     return obj;
 }
 
+/**
+ * Creates new objects from the origin of a tagged object, with the same angle.
+ */
+function shoot(origin, imgSource, tags, force, friction) {
+    return gl4.register(origin, function (object) {
+        var angle = object.pos.angle;
+        var inertia = {x: Math.cos(angle) * force, y: Math.sin(angle) * force};
+        console.log(inertia);
+        gl4.create(imgSource, tags, object.pos, inertia, friction);
+    });
+}
+
 gl4.start(true);
