@@ -366,10 +366,11 @@ function push(target, acceleration) {
 /**
  * Accelerates tagged objects in direction to tagged targets.
  */
-function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
+function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
     force = force !== undefined ? force : 5;
     turningSpeed = turningSpeed !== undefined ? turningSpeed : 30;
     maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
+    var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;
 
     function findAngle(currentAngle, difX, difY) {
         var angle = Math.atan2(difY, difX);
@@ -395,7 +396,10 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y;
 
-        if (difX * difX + difY * difY <= maxTolerableDistance * maxTolerableDistance) {
+        var distanceSquared = difX * difX + difY * difY;
+        if ((force > 0 && distanceSquared <= maxDistanceSquared) ||
+            (force < 0 && distanceSquared >= maxDistanceSquared)) {
+
             return;
         }
         
