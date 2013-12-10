@@ -246,15 +246,28 @@ var gl4 = (function () {
          * `friction` is a {x, y, angle} dict of the desired initial friction.
          */
         create: function (imageSource, objTags, pos, inertia, friction) {
-            pos = pos || {}
-            inertia = inertia || {}
-            friction = friction || {}
+            if (typeof objTags === "string") {
+                objTags = [objTags]
+            }
+
+            // Takes an object and fills empty values with defaults.
+            function d(original, def) {
+                original = original || {};
+                var obj = {};
+
+                for (var property in def) {
+                    var cur = original[property];
+                    obj[property] = cur !== undefined ? cur : def[property];
+                }
+
+                return obj;
+            }
 
             var obj = {
                 tags: objTags,
-                pos: {x: pos.x || 0, y: pos.y || 0, angle: pos.angle || 0},
-                inertia: {x: inertia.x || 0, y: inertia.y || 0, angle: inertia.angle || 0},
-                friction: {x: friction.x || 0.8, y: friction.y || 0.8, angle: friction.angle || 0},
+                pos: d(pos, {x: 0, y: 0, angle: 0}),
+                inertia: d(inertia, {x: 0, y: 0, angle: 0}),
+                friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
                 img: new Image(),
 
                 move: function (speed) {
@@ -521,10 +534,18 @@ function r(minValues, maxValues) {
  * Creates new objects from the origin of a tagged object, with the same angle.
  */
 function shoot(origin, imgSource, tags, force, friction) {
-    return gl4.register(origin, function (object) {
-        var angle = object.pos.angle;
-        var inertia = {x: Math.cos(angle) * force, y: Math.sin(angle) * force};
-        gl4.create(imgSource, tags, object.pos, inertia, friction);
+    return gl4.register(origin, function (obj) {
+        var angle = obj.pos.angle,
+            distance = obj.size.x / 2,
+            cos = -Math.cos(angle),
+            sin = -Math.sin(angle),
+            pos = {x: obj.pos.x + cos * distance,
+                   y: obj.pos.y + sin * distance,
+                   angle: angle},
+            inertia = {x: cos * force,
+                       y: sin * force};
+
+        gl4.create(imgSource, tags, pos, inertia, friction);
     });
 }
 
