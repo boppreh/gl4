@@ -283,6 +283,9 @@ var gl4 = (function () {
          */
         stop: function () {
             running = false;
+            if (debug) {
+                context.fillText("PAUSED", canvas.width, 52);
+            }
         },
     };
 }());
