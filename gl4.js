@@ -80,7 +80,6 @@ var gl4 = (function () {
     }
 
     function runBehavior(behavior) {
-
         // Number of tags could be abstracted to N if we used a recursive
         // function, but the complexity and performance penalty is not worth it
         // right now. Especially in cases like collision detection, where
@@ -278,17 +277,17 @@ var gl4 = (function () {
             obj.img.onload = function () {
                 nLoading--;
                 obj.size = {x: obj.img.width, y: obj.img.height}
+
+                objects.push(obj);
+                objTags.forEach(function (tag) {
+                    if (tags[tag] === undefined) {
+                        tags[tag] = [obj];
+                    } else {
+                        tags[tag].push(obj);
+                    }
+                });
             };
             obj.img.src = imageSource;
-
-            objects.push(obj);
-            objTags.forEach(function (tag) {
-                if (tags[tag] === undefined) {
-                    tags[tag] = [obj];
-                } else {
-                    tags[tag].push(obj);
-                }
-            });
         },
 
         /**
