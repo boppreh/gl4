@@ -6,17 +6,17 @@
         <title>GL4</title>
     </head>
 
-    <body>
-        <canvas id="canvas" width=800 height=400></canvas>
+    <body style="background: black;">
+        <canvas id="canvas" width=800 height=600 style="background: white;"></canvas>
         <script type="text/javascript" src="gl4.js"></script>
 
         <script>
 // window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-gl4.create("star.png", ["star"], {x: 100, y: 100, angle: Math.PI}, null);
+gl4.create("star.png", ["star", "main"], {x: 100, y: 100, angle: Math.PI}, null);
 
-follow("star", "mouse");
-follow("star", "star", -1);
+follow("main", "mouse");
+follow("star", "main", -1);
 move("star", {angle: 0.1})
 onMouseDown(create("star.png", ["star"]));
 wrap("star");
