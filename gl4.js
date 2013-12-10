@@ -21,7 +21,7 @@ var gl4 = (function () {
 
     context.textAlign = "right"
     context.fillStyle = "green";
-    context.font = "bold 16px Verdana"
+    context.font = "bold 16px Verdana";
 
     function updateFps() {
         var currentLoop = new Date;
@@ -108,10 +108,13 @@ var gl4 = (function () {
         context.drawImage(object.img, -object.size.width / 2, -object.size.height / 2);
         context.restore();
 
-        for (var i = 0; i < object.tags.length; i++) {
-            var x = object.pos.x + object.size.width / 2,
-                y = object.pos.y - object.size.height / 2 + i * 16;
-            context.fillText(object.tags[i], x, y);
+        if (debug) {
+            for (var i = 0; i < object.tags.length; i++) {
+                var x = object.pos.x + object.size.width / 2,
+                    y = object.pos.y - object.size.height / 2 + i * 16;
+
+                context.fillText(object.tags[i], x, y);
+            }
         }
     }
 
