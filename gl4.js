@@ -185,6 +185,12 @@ var gl4 = (function () {
                     this.pos.x += speed.x || 0;
                     this.pos.y += speed.y || 0;
                     this.pos.angle += speed.angle || 0;
+                    while (this.pos.angle < 0) {
+                        this.pos.angle += Math.PI * 2;
+                    }
+                    while (this.pos.angle > Math.PI * 2) {
+                        this.pos.angle -= Math.PI * 2;
+                    }
                 },
 
                 push: function (acceleration) {
