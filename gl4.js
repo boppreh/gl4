@@ -130,11 +130,11 @@ var gl4 = (function () {
     function step() {
         clearCanvas();
 
-        objects.forEach(stepObject);
-
         for (var id in behaviors) {
             runBehavior(behaviors[id]);
         }
+
+        objects.forEach(stepObject);
     }
 
     window.onmousemove = function (event) {
