@@ -23,6 +23,10 @@ var gl4 = (function () {
         nLoading = 0,
         debug = false,
 
+        // Stores the currently playing sounds similarly to the behaviors.
+        sounds = {},
+        soundsCount = 0,
+
         // Used for FPS calculation.
         frameTime = 0,
         lastLoop = new Date,
@@ -368,19 +372,6 @@ function create(img, tags, pos, inertia, friction) {
 }
 
 /**
- * Runs a behavior while the mouse left button is pressed.
- */
-function onMouseDown(behavior) {
-    gl4.unregister(behavior);
-
-    return gl4.register(function () {
-        if (gl4.isMouseDown()) {
-            behavior.run();
-        }
-    });
-}
-
-/**
  * Forces tagged object to stay within a specified rectangle, warping them to
  * the opposite end when the boundary is passed.
  */
@@ -412,11 +403,27 @@ function wrap(target, start, end) {
 }
 
 /**
+ * Runs a behavior while the mouse left button is pressed.
+ */
+function onMouseDown(behavior) {
+    gl4.unregister(behavior);
+
+    return gl4.register(function () {
+        if (gl4.isMouseDown()) {
+            behavior.run();
+        }
+    });
+}
+
+/**
  * Runs a behavior while there are collisions between the two types of tagged
  * objects.
  */
-function onHit(object, target, behavior) {
-    gl4.unregister(behavior);
+function onHit(object, target) {
+    var behaviors = Array.prototype.slice.call(arguments, 2);
+    for (var i in behaviors) {
+        gl4.unregister(behaviors[i]);
+    }
 
     return gl4.register([object, target], function (object, target) {
         if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
@@ -424,8 +431,19 @@ function onHit(object, target, behavior) {
               object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
               object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
 
-            behavior.run();
+            for (var i in behaviors) {
+                behaviors[i].run();
+            }
         }
+    });
+}
+
+/**
+ * Plays a sound every time this behavior is run.
+ */
+function sound(src) {
+    return gl4.register(function () {
+        new Audio(src).play();
     });
 }
 
