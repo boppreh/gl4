@@ -159,15 +159,11 @@ var gl4 = (function () {
     }, false);
 
     window.addEventListener('keydown', function (event) {
-        // Regular keycode.
         pressedKeys[event.which] = true;
-        // String representation (e.g. 'spacebar', 'enter').
-        pressedKeys[event.key.toLowerCase()] = true;
     }, false);
 
     window.addEventListener('keyup', function (event) {
         delete pressedKeys[event.which];
-        delete pressedKeys[event.key.toLowerCase()];
     }, false);
 
     return {
@@ -178,8 +174,18 @@ var gl4 = (function () {
         },
 
         isPressed: function(key) {
-           return pressedKeys[key] !== undefined;
-       },
+            if (typeof key === 'string') {
+                key = {
+                    'space': 32,
+                    'left': 37,
+                    'up': 38,
+                    'right': 39,
+                    'down': 40,
+                }[key];
+            }
+
+            return pressedKeys[key] !== undefined;
+        },
 
         tagged: function (tag) {
             return tags[tag] || [];
