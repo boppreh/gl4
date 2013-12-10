@@ -6,20 +6,27 @@ var gl4 = (function () {
 
     var canvas = document.getElementById("canvas"),
         context = canvas.getContext("2d"),
+
         running = false,
         objects = [],
+        // Pseudo-object. Exists, but is not rendered or updated in `step`.
         mouse = {pos: {x: 0, y: 0, angle: 0},
                  inertia: {x: 0, y: 0, angle: 0},
-                 size: {x: 0, y: 0}},
+                 size: {x: 0, y: 0},
+                 isDown: false},
         tags = {"mouse": [mouse]},
+        // Behaviors use a dictionary for cheap insertion and deletion.
         behaviors = {},
+        // Used for generating unique ids for behaviors.
+        behaviorCount = 0,
+        // Number of images still loading.
         nLoading = 0,
+        debug = false,
+
+        // Used for FPS calculation.
         frameTime = 0,
         lastLoop = new Date,
-        fps = 0,
-        debug = false,
-        mouseDown = false,
-        behaviorCount = 0;
+        fps = 0;
 
     context.textAlign = "right"
     context.fillStyle = "green";
@@ -38,10 +45,12 @@ var gl4 = (function () {
 
     function run() {
         if (!running) {
+            // Will not request another frame and automatically stop running.
             return;
         }
 
         if (nLoading === 0) {
+            // Not more images to load, safe to run.
             step();
         }
 
@@ -65,29 +74,28 @@ var gl4 = (function () {
     }
 
     function runBehavior(behavior) {
-        var tagged = tags[behavior.tags[0]];
+
+        // Number of tags could be abstracted to N if we used a recursive
+        // function, but the complexity and performance penalty is not worth it
+        // right now. Especially in cases like collision detection, where
+        // number of calls could be nObjects^2, function overhead would
+        // dominate.
 
         if (behavior.tags.length === 0) {
             behavior.func();
 
         } else if (behavior.tags.length === 1) {
-            if (!tags[behavior.tags[0]]) {
-                return;
-            }
-
+            var tagged = tags[behavior.tags[0]];
             for (var i in tagged) {
                 behavior.func(tagged[i]);
             }
 
         } else if (behavior.tags.length === 2) {
-            if (!tags[behavior.tags[0]] && !tags[behavior.tags[1]]) {
-                return;
-            }
-
+            var tagged1 = tags[behavior.tags[0]];
             var tagged2 = tags[behavior.tags[1]];
-            for (var i in tagged) {
+            for (var i in tagged1) {
                 for (var j in tagged2) {
-                    behavior.func(tagged[i], tagged2[j]);
+                    behavior.func(tagged1[i], tagged2[j]);
                 }
             }
         }
@@ -98,6 +106,7 @@ var gl4 = (function () {
         object.inertia.x *= (1 - object.friction.x);
         object.inertia.y *= (1 - object.friction.y);
         object.inertia.angle *= (1 - object.friction.angle);
+        // TODO: Update `object.size` on rotation.
 
         context.save();
         context.translate(object.pos.x, object.pos.y);
@@ -106,6 +115,8 @@ var gl4 = (function () {
         context.restore();
 
         if (debug) {
+            // Print all tags on top right corner of object, one below the
+            // other.
             for (var i = 0; i < object.tags.length; i++) {
                 var x = object.pos.x + object.size.x / 2,
                     y = object.pos.y - object.size.y / 2 + i * 16;
@@ -115,8 +126,10 @@ var gl4 = (function () {
         }
     }
 
+    // Advance physics.
     function step() {
         clearCanvas();
+
         objects.forEach(stepObject);
 
         for (var id in behaviors) {
@@ -132,18 +145,11 @@ var gl4 = (function () {
         mouse.pos.y = event.clientY;
     };
 
-    window.onmousedown = function (event) {
-        mouseDown = true;
-    };
-
-    window.onmouseup = function (event) {
-        mouseDown = false;
-    };
+    window.onmousedown = function (event) { mouse.isDown = true; };
+    window.onmouseup = function (event) { mouse.isDown = false; };
 
     return {
-        isMouseDown: function () {
-            return mouseDown;
-        },
+        mouse: mouse,
 
         isRunning: function () {
             return running;
@@ -153,6 +159,26 @@ var gl4 = (function () {
             return tags[tag] || [];
         },
 
+        /**
+         * `register(func)` or `register([tagsUsed], func)`
+         *
+         * Register a new behavior. `func` is invoked once for every
+         * tagged combination of items[1], or once every frame if not tags were
+         * used.
+         *
+         * Returns a `behavior` object which can be unregistered or `run`
+         * manually.
+         *
+         * No more than 2 tags must be used.
+         *
+         * [1]
+         *   register(["bullet", "ship"], func);
+         *
+         *   func(bullet1, ship1);
+         *   func(bullet2, ship1);
+         *   func(bullet1, ship2);
+         *   ...
+         */
         register: function (tags, func) {
             if (func === undefined) {
                 func = tags;
@@ -163,16 +189,33 @@ var gl4 = (function () {
                 console.error("Behavior must have two or less declared tags.", tags);
             }
 
-            var behavior = {id: behaviorCount++, tags: tags, func: func};
+            var behavior = {id: behaviorCount++,
+                            tags: tags,
+                            func: func,
+                            run: function() {
+                                runBehavior(this);
+                            }};
             behaviors[behavior.id] = behavior;
 
             return behavior;
         },
 
+        /**
+         * Unregisters a previously registered behavior.
+         */
         unregister: function (behavior) {
             delete behaviors[behavior.id];
         },
 
+        /**
+         * Manually creates a new object.
+         *
+         * `imageSource` is a URL pointing to an image.
+         * `objTags` is an array of the tags the object will have.
+         * `pos` is a {x, y, angle} dict of the desired initial position.
+         * `inertia` is a {x, y, angle} dict of the desired initial inertia.
+         * `friction` is a {x, y, angle} dict of the desired initial friction.
+         */
         create: function (imageSource, objTags, pos, inertia, friction) {
             var obj = {
                 tags: objTags,
@@ -217,6 +260,13 @@ var gl4 = (function () {
             });
         },
 
+        /**
+         * Starts running the simulation. `debugMode` specifies if the FPS
+         * counter and tag annotations will appear.
+         *
+         * If not provided, `debugMode` falls back to the last value used
+         * (defaults to `false`).
+         */
         start: function (debugMode) {
             debug = debugMode || debug;
 
@@ -224,26 +274,37 @@ var gl4 = (function () {
             running = true;
         },
 
+        /**
+         * Stops running the simulation.
+         */
         stop: function () {
             running = false;
         },
-
-        runBehavior: runBehavior
     };
 }());
 
+/**
+ * Creates a new behavior that moves all tagged objects with a fixed speed,
+ * regardless and without touching their inertia.
+ */
 function move(target, speed) {
     return gl4.register([target], function (object) {
         object.move(speed);
     });
 }
 
+/**
+ * Accelerate tagged objects.
+ */
 function push(target, acceleration) {
     return gl4.register([target], function (object) {
         object.push(acceleration);
     });
 }
 
+/**
+ * Accelerates tagged objects in direction to tagged targets.
+ */
 function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
     force = force !== undefined ? force : 5;
     turningSpeed = turningSpeed !== undefined ? turningSpeed : 30;
@@ -288,6 +349,9 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
     });
 }
 
+/**
+ * Creates a new object every time the behavior is run.
+ */
 function create(img, tags, pos, inertia, friction) {
     pos = pos || {};
     inertia = inertia || {};
@@ -303,16 +367,23 @@ function create(img, tags, pos, inertia, friction) {
     });
 }
 
+/**
+ * Runs a behavior while the mouse left button is pressed.
+ */
 function onMouseDown(behavior) {
     gl4.unregister(behavior);
 
     return gl4.register(function () {
         if (gl4.isMouseDown()) {
-            gl4.runBehavior(behavior);
+            behavior.run();
         }
     });
 }
 
+/**
+ * Forces tagged object to stay within a specified rectangle, warping them to
+ * the opposite end when the boundary is passed.
+ */
 function wrap(target, start, end) {
     if (end === undefined && start !== undefined) {
         end = start;
@@ -340,6 +411,10 @@ function wrap(target, start, end) {
     });
 }
 
+/**
+ * Runs a behavior while there are collisions between the two types of tagged
+ * objects.
+ */
 function onHit(object, target, behavior) {
     gl4.unregister(behavior);
 
@@ -349,7 +424,7 @@ function onHit(object, target, behavior) {
               object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
               object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
 
-            gl4.runBehavior(behavior);
+            behavior.run();
         }
     });
 }
