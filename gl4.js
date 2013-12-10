@@ -310,7 +310,10 @@ var gl4 = (function () {
          */
         stop: function () {
             running = false;
+
             if (debug) {
+                // This text will be automatically erased the next time the
+                // canvas is cleaned.
                 context.fillText('PAUSED', canvas.width, 52);
             }
         },
@@ -387,17 +390,9 @@ function follow(objTag, targetTag, force, turningSpeed, maxTolerableDistance) {
  * Creates a new object every time the behavior is run.
  */
 function create(img, tags, pos, inertia, friction) {
-    pos = pos || {};
-    inertia = inertia || {};
-    friction = friction || {x: 0.8, y: 0.8, angle: 0};
-
-    // Clones a {x, y, angle} triple to avoid mutating the same object.
-    function c(triple) {
-        return {x: triple.x || 0, y: triple.y || 0, angle: triple.angle || 0};
-    }
-
     return gl4.register(function () {
-        gl4.create(img, tags.slice(), c(pos), c(inertia), c(friction));
+        var tagsCopy = tags.slice();
+        gl4.create(img, tagsCopy, pos, inertia, friction);
     });
 }
 
