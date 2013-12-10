@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-    <meta charset="utf-8" />
+    <meta charset='utf-8' />
     <head>
         <title>GL4</title>
     </head>
 
-    <body style="background: black;">
-        <canvas id="canvas" width=800 height=600 style="background: white;"></canvas>
-        <script type="text/javascript" src="gl4.js"></script>
+    <body style='background: black;'>
+        <canvas id='canvas' width=800 height=600 style='background: white;'></canvas>
+        <script type='text/javascript' src='gl4.js'></script>
 
         <script>
 window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-gl4.create("star.png", ["star"], {x: 200, y: 200, angle: Math.PI}, null,
-                                 {x: 0.8, y: 0.8, angle: 0.8});
+gl4.create('star.png', ['star'], {x: 200, y: 200, angle: Math.PI}, null,
+                                 {x: 0.5, y: 0.5, angle: 0.3});
 
-var p = push("star", r({x: -500, y: -500, angle: -7},
-                       {x: 500, y: 500, angle: 7}));
-var s = sound("ok.mp3");
-onHit("star", "mouse", p, s);
-wrap("star");
+var p = push('star', r({x: -500, y: -500, angle: -5},
+                       {x: 500, y: 500, angle: 5}));
+var s = sound('ok.mp3');
+onHit('star', 'mouse', p, s);
+wrap('star');
+
+onPressed('spacebar', push('star', {angle: 20}));
         </script>
     </body>
 </html>
