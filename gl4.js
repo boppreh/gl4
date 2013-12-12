@@ -58,6 +58,9 @@ var gl4 = (function () {
         if (nLoading === 0) {
             // Not more images to load, safe to run.
             step();
+            render();
+        } else if (debug) {
+            context.fillText('LOADING', canvas.width, 68);
         }
 
         if (debug) {
@@ -65,6 +68,28 @@ var gl4 = (function () {
         }
 
         window.requestAnimationFrame(run);
+    }
+
+    function render() {
+        for (var i in objects) {
+            var object = objects[i];
+            context.save();
+            context.translate(object.pos.x, object.pos.y);
+            context.rotate(-object.pos.angle);
+            context.drawImage(object.img, -object.size.x / 2, -object.size.y / 2);
+            context.restore();
+
+            if (debug) {
+                // Print all tags on top right corner of object, one below the
+                // other.
+                for (var i = 0; i < object.tags.length; i++) {
+                    var x = object.pos.x + object.size.x / 2,
+                        y = object.pos.y - object.size.y / 2 + i * 16;
+
+                    context.fillText(object.tags[i], x, y);
+                }
+            }
+        }
     }
 
     function clearCanvas() {
@@ -79,40 +104,21 @@ var gl4 = (function () {
         }
     }
 
-    function stepObject(object) {
-        object.move(object.inertia);
-        object.inertia.x *= (1 - object.friction.x);
-        object.inertia.y *= (1 - object.friction.y);
-        object.inertia.angle *= (1 - object.friction.angle);
-        // TODO: Update `object.size` on rotation.
-
-        context.save();
-        context.translate(object.pos.x, object.pos.y);
-        context.rotate(-object.pos.angle);
-        context.drawImage(object.img, -object.size.x / 2, -object.size.y / 2);
-        context.restore();
-
-        if (debug) {
-            // Print all tags on top right corner of object, one below the
-            // other.
-            for (var i = 0; i < object.tags.length; i++) {
-                var x = object.pos.x + object.size.x / 2,
-                    y = object.pos.y - object.size.y / 2 + i * 16;
-
-                context.fillText(object.tags[i], x, y);
-            }
-        }
-    }
-
     // Advance physics.
     function step() {
         clearCanvas();
 
+        for (var i in objects) {
+            var object = objects[i];
+            object.move(object.inertia);
+            object.inertia.x *= (1 - object.friction.x);
+            object.inertia.y *= (1 - object.friction.y);
+            object.inertia.angle *= (1 - object.friction.angle);
+        }
+
         for (var id in behaviors) {
             behaviors[id]();
         }
-
-        objects.forEach(stepObject);
     }
 
     function tagged(tag) {
@@ -132,7 +138,6 @@ var gl4 = (function () {
                 rest = tags.slice(1),
                 nPrevious = parameters.length;
 
-            console.log(tags, parameters, firstList, rest);
             if (firstList.length == 0) {
                 callback.apply(callback, parameters);
                 return;
