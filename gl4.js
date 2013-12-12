@@ -483,53 +483,70 @@ function reflect(target, start, end) {
     });
 }
 
-/**
- * Runs a behavior while the mouse left button is pressed.
- */
-function onMouseDown(behavior) {
-    gl4.unregister(behavior);
+var MATCH_1 = [];
+var MATCH_2 = [];
+var MATCH_3 = [];
 
-    return gl4.register(function () {
-        if (gl4.isMouseDown()) {
-            behavior.run();
-        }
-    });
-}
-
-/**
- * Runs a behavior while a given key is pressed.
- */
-function onPressed(key, behavior) {
-    gl4.unregister(behavior);
-
-    return gl4.register(function () {
-        if (gl4.isPressed(key)) {
-            behavior.run();
-        }
-    });
-}
-
-/**
- * Runs a behavior while there are collisions between the two types of tagged
- * objects.
- */
-function onHit(object, target) {
-    var behaviors = Array.prototype.slice.call(arguments, 2);
+function on(condition/*, ...behaviors*/) {
+    var behaviors = Array.prototype.slice.call(arguments, 1);
     for (var i in behaviors) {
+        if (behaviors[i].id === undefined) {
+            // Object is a raw function and must be converted to behavior.
+            behaviors[i] = gl4.register(behaviors[i]);
+        }
+
+        // Stop the kernel from calling the behaviors automatically.
         gl4.unregister(behaviors[i]);
     }
 
-    return gl4.register([object, target], function (object, target) {
-        if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
-              object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
-              object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
-              object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
+    function runBehaviors(match1, match2, match3) {
+        MATCH_1[0] = match1;
+        MATCH_2[0] = match2;
+        MATCH_3[0] = match3;
 
-            for (var i in behaviors) {
-                behaviors[i].run();
-            }
+        for (var i in behaviors) {
+            behaviors[i].run();
+        }
+    }
+
+    return gl4.register(function () {
+        var result = condition(runBehaviors);
+        // Allow conditions to return true instead of using the callback.
+        if (result === true) {
+            runBehaviors();
         }
     });
+}
+
+function mouseDown() {
+    return gl4.isMouseDown;
+}
+
+function keyDown(key) {
+    return function() {
+        return gl4.isPressed(key);
+    }
+}
+
+function hit(objectTag, targetTag) {
+    objects = gl4.tagged(objectTag);
+    targets = gl4.tagged(targetTag);
+
+    return function(callback) {
+        for (var i in objects) {
+            var object = objects[i];
+            for (var j in targets) {
+                var target = target[j];
+                if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
+                      object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
+                      object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
+                      object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
+
+                    callback(object, target);
+                }
+            }
+        }
+    }
 }
 
 /**
