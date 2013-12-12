@@ -316,11 +316,7 @@ var gl4 = (function () {
 
                 objects.push(obj);
                 objTags.forEach(function (tag) {
-                    if (tags[tag] === undefined) {
-                        tags[tag] = [obj];
-                    } else {
-                        tags[tag].push(obj);
-                    }
+                    tagged(tag).push(obj);
                 });
             };
             obj.img.src = imageSource;
@@ -497,6 +493,25 @@ function reflect(target, start, end) {
     });
 }
 
+/**
+ * Creates new objects from the origin of a tagged object, with the same angle.
+ */
+function shoot(origin, imgSource, tags, force, friction) {
+    return gl4.register(origin, function (obj) {
+        var angle = obj.pos.angle,
+            distance = obj.size.x / 2,
+            cos = -Math.cos(angle),
+            sin = -Math.sin(angle),
+            pos = {x: obj.pos.x + cos * distance,
+                   y: obj.pos.y + sin * distance,
+                   angle: angle},
+            inertia = {x: cos * force,
+                       y: sin * force};
+
+        gl4.create(imgSource, tags, pos, inertia, friction);
+    });
+}
+
 var MATCH_1 = [];
 var MATCH_2 = [];
 var MATCH_3 = [];
@@ -543,23 +558,16 @@ function keyDown(key) {
 }
 
 function hit(objectTag, targetTag) {
-    var objects = gl4.tagged(objectTag);
-    var targets = gl4.tagged(targetTag);
-
     return function(callback) {
-        for (var i in objects) {
-            var object = objects[i];
-            for (var j in targets) {
-                var target = targets[j];
-                if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
-                      object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
-                      object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
-                      object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
+        gl4.forEach(objectTag, targetTag, function(object, target) {
+            if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
+                  object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
+                  object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
+                  object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
 
-                    callback(object, target);
-                }
+                callback(object, target);
             }
-        }
+        });
     }
 }
 
@@ -597,25 +605,6 @@ function r(minValues, maxValues) {
     update();
 
     return obj;
-}
-
-/**
- * Creates new objects from the origin of a tagged object, with the same angle.
- */
-function shoot(origin, imgSource, tags, force, friction) {
-    return gl4.register(origin, function (obj) {
-        var angle = obj.pos.angle,
-            distance = obj.size.x / 2,
-            cos = -Math.cos(angle),
-            sin = -Math.sin(angle),
-            pos = {x: obj.pos.x + cos * distance,
-                   y: obj.pos.y + sin * distance,
-                   angle: angle},
-            inertia = {x: cos * force,
-                       y: sin * force};
-
-        gl4.create(imgSource, tags, pos, inertia, friction);
-    });
 }
 
 gl4.start(true);
