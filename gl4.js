@@ -538,6 +538,7 @@ function on(condition/*, ...behaviors*/) {
         }
     }
 
+    console.log(condition);
     return gl4.register(function () {
         var result = condition(runBehaviors);
         // Allow conditions to return true instead of using the callback.
