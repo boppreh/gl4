@@ -24,6 +24,7 @@ New Features
 System suggestions
 ==================
 
+! Use OOP for creating Behaviors
 ! Allow objects found by conditionals to be used by behaviors
 + Remove 'tags' from 'register' and use 'bind' function
 + Include effects support
