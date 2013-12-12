@@ -79,33 +79,6 @@ var gl4 = (function () {
         }
     }
 
-    function runBehavior(behavior) {
-        // Number of tags could be abstracted to N if we used a recursive
-        // function, but the complexity and performance penalty is not worth it
-        // right now. Especially in cases like collision detection, where
-        // number of calls could be nObjects^2, function overhead would
-        // dominate.
-
-        if (behavior.tags.length === 0) {
-            behavior.func();
-
-        } else if (behavior.tags.length === 1) {
-            var tagged = tags[behavior.tags[0]];
-            for (var i in tagged) {
-                behavior.func(tagged[i]);
-            }
-
-        } else if (behavior.tags.length === 2) {
-            var tagged1 = tags[behavior.tags[0]];
-            var tagged2 = tags[behavior.tags[1]];
-            for (var i in tagged1) {
-                for (var j in tagged2) {
-                    behavior.func(tagged1[i], tagged2[j]);
-                }
-            }
-        }
-    }
-
     function stepObject(object) {
         object.move(object.inertia);
         object.inertia.x *= (1 - object.friction.x);
@@ -136,10 +109,43 @@ var gl4 = (function () {
         clearCanvas();
 
         for (var id in behaviors) {
-            runBehavior(behaviors[id]);
+            behaviors[id]();
         }
 
         objects.forEach(stepObject);
+    }
+
+    function tagged(tag) {
+        if (tags[tag] == undefined) {
+            tags[tag] = [];
+        }
+        return tags[tag];
+    }
+
+    function forEach(/*tags, callback*/) {
+        var args = Array.prototype.slice.call(arguments, 0),
+            tags = args.slice(0, -1),
+            callback = args.slice(-1)[0];
+
+        function cartesianProduct(tags, parameters) {
+            var firstList = tagged(tags[0]),
+                rest = tags.slice(1),
+                nPrevious = parameters.length;
+
+            console.log(tags, parameters, firstList, rest);
+            if (firstList.length == 0) {
+                callback.apply(callback, parameters);
+                return;
+            }
+
+            parameters.push(null);
+            for (var i in firstList) {
+                parameters[nPrevious] = firstList[i];
+                cartesianProduct(rest, parameters);
+            }
+        }
+
+        cartesianProduct(tags, []);
     }
 
     window.addEventListener('mousemove', function (event) {
@@ -187,22 +193,31 @@ var gl4 = (function () {
             return pressedKeys[key] !== undefined;
         },
 
-        tagged: function (tag) {
-            if (tags[tag] == undefined) {
-                tags[tag] = [];
-            }
-            return tags[tag];
-        },
+        tagged: tagged, 
+
+        /**
+         * Calls `callback` with each combination of tagged objects.
+         *
+         * Ex:
+         * forEach('bullet', 'ship', callback)
+         *
+         * callback(bullet1, ship1);
+         * callback(bullet1, ship2);
+         * callback(bullet2, ship1);
+         * callback(bullet2, ship2);
+         * ...
+         */
+        forEach: forEach,
 
         /**
          * `register(func)` or `register(singleTag, func)`,
-         * `register([manyTags], func)`
+         * `register(tag1, tag2, tag3, func)`
          *
          * Register a new behavior. `func` is invoked once for every
          * tagged combination of items[1], or once every frame if not tags were
          * used.
          *
-         * Returns a `behavior` object which can be unregistered or `run`
+         * Returns a `behavior` object which can be unregistered or called
          * manually.
          *
          * No more than 2 tags must be used.
@@ -215,26 +230,17 @@ var gl4 = (function () {
          *   func(bullet1, ship2);
          *   ...
          */
-        register: function (tags, func) {
-            if (func === undefined) {
-                func = tags;
-                tags = [];
-            } else if (typeof tags === "string") {
-                tags = [tags]
+        register: function (/*tag1, tag2, tag3, func*/) {
+            var args = Array.prototype.slice.call(arguments, 0),
+                func = args.slice(-1)[0],
+                tags = args.slice(0, -1);
+
+            var behavior = function () {
+                forEach.apply(forEach, args);
             }
 
-            if (tags.length > 2) {
-                console.error('Behavior must have two or less declared tags.', tags);
-            }
-
-            var behavior = {id: behaviorCount++,
-                            tags: tags,
-                            func: func,
-                            run: function() {
-                                runBehavior(this);
-                            }};
+            behavior.id = behaviorCount++;
             behaviors[behavior.id] = behavior;
-
             return behavior;
         },
 
@@ -395,7 +401,7 @@ function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
         return currentAngle + (totalAngularDifference > 0 ? turningSpeed : -turningSpeed);
     }
 
-    return gl4.register([objTag, targetTag], function (object, target) {
+    return gl4.register(objTag, targetTag, function (object, target) {
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y;
 
@@ -508,7 +514,7 @@ function on(condition/*, ...behaviors*/) {
         MATCH_3[0] = match3;
 
         for (var i in behaviors) {
-            behaviors[i].run();
+            behaviors[i]();
         }
     }
 
