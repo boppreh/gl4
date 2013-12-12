@@ -17,7 +17,7 @@ gl4.create('star.png', ['star'], {x: 200, y: 200}, null,
                                  {x: 0.01, y: 0.1, angle: 0.3});
 
 push('star', {y: 2});
-onHit('star', 'mouse', gl4.register(['star', 'mouse'], function (star, mouse) {
+on(hit('star', 'mouse'), gl4.register(['star', 'mouse'], function (star, mouse) {
     var distance = mouse.pos.x - star.pos.x;
     var direction = distance < 0 ? 1 : -1;
     star.inertia.x += direction * Math.log(Math.abs(mouse.pos.x - star.pos.x));

@@ -188,7 +188,10 @@ var gl4 = (function () {
         },
 
         tagged: function (tag) {
-            return tags[tag] || [];
+            if (tags[tag] == undefined) {
+                tags[tag] = [];
+            }
+            return tags[tag];
         },
 
         /**
@@ -529,14 +532,14 @@ function keyDown(key) {
 }
 
 function hit(objectTag, targetTag) {
-    objects = gl4.tagged(objectTag);
-    targets = gl4.tagged(targetTag);
+    var objects = gl4.tagged(objectTag);
+    var targets = gl4.tagged(targetTag);
 
     return function(callback) {
         for (var i in objects) {
             var object = objects[i];
             for (var j in targets) {
-                var target = target[j];
+                var target = targets[j];
                 if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
                       object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
                       object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
