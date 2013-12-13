@@ -245,10 +245,12 @@ var gl4 = (function () {
 
     window.addEventListener('keydown', function (event) {
         pressedKeys[event.which] = true;
+        event.preventDefault();
     }, false);
 
     window.addEventListener('keyup', function (event) {
         delete pressedKeys[event.which];
+        event.preventDefault();
     }, false);
 
     return {
