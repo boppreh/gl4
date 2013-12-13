@@ -549,7 +549,9 @@ function on(condition/*, ...behaviors*/) {
 }
 
 function mouseDown() {
-    return gl4.isMouseDown;
+    return function () {
+        gl4.mouse.isDown;
+    }
 }
 
 function keyDown(key) {
