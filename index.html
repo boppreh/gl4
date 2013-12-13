@@ -26,13 +26,15 @@ on(mouseDown(),
       push('star', {y: -20}),
       follow('star', 'mouse', -2, NaN)));
 
-gl4.register(points.increment);
-on(function () { return star.pos.y > 580; }, points.zero);
 on(keyDown('space'), push('points', {angle: 0.5}));
 
 gl4.register(function() {
+    points.text++;
     if (points.text > max.text) {
         max.text = points.text;
+    }
+    if (star.pos.y > 500) {
+        points.text = 0;
     }
 });
         </script>
