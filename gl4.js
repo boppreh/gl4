@@ -1,5 +1,15 @@
 "use strict";
 
+// Compatibility for older Firefox and Opera versions.
+if (window.requestAnimationFrame === undefined) {
+    window.requestAnimationFrame = function (handler) {
+        return setTimeout(handler, 1000 / 60);
+    }
+    window.cancleAnimationFrame = function (requestId) {
+        return clearTimeout(requestId);
+    }
+}
+
 var gl4 = (function () {
     var FRAME_TIME_FILTER = 10,
         MOTION_BLUR_STRENGTH = 0.5;
@@ -32,7 +42,9 @@ var gl4 = (function () {
         // Used for FPS calculation.
         frameTime = 0,
         lastLoop = new Date,
-        fps = 0;
+        fps = 0,
+        
+        frameRequestId = 0;
 
     context.textAlign = 'right'
     context.fillStyle = 'green';
@@ -67,7 +79,7 @@ var gl4 = (function () {
             updateFps();
         }
 
-        window.requestAnimationFrame(run);
+        frameRequestId = window.requestAnimationFrame(run);
     }
 
     function render() {
@@ -387,6 +399,10 @@ var gl4 = (function () {
         stop: function () {
             running = false;
 
+            if (frameRequestId !== 0) {
+                window.cancelAnimationFrame(frameRequestId);
+            }
+
             if (debug) {
                 // This text will be automatically erased the next time the
                 // canvas is cleaned.
@@ -651,4 +667,4 @@ function r(minValues, maxValues) {
     return obj;
 }
 
-gl4.start();
+gl4.start(true);
