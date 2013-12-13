@@ -11,8 +11,15 @@ if (window.requestAnimationFrame === undefined) {
 }
 
 var gl4 = (function () {
+
     var FRAME_TIME_FILTER = 10,
-        MOTION_BLUR_STRENGTH = 0.5;
+        MOTION_BLUR_STRENGTH = 0.5,
+        KEYCODE_BY_NAME = {'space': 32, 'left': 37, 'up': 38, 'right': 39, 'down': 40},
+        NAME_BY_KEYCODE = {};
+
+    for (var name in KEYCODE_BY_NAME) {
+        NAME_BY_KEYCODE[KEYCODE_BY_NAME[name]] = name;
+    }
 
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
@@ -252,12 +259,16 @@ var gl4 = (function () {
 
     window.addEventListener('keydown', function (event) {
         pressedKeys[event.which] = true;
-        event.preventDefault();
+        if (event.which in NAME_BY_KEYCODE) {
+            event.preventDefault();
+        }
     }, false);
 
     window.addEventListener('keyup', function (event) {
         delete pressedKeys[event.which];
-        event.preventDefault();
+        if (event.which in NAME_BY_KEYCODE) {
+            event.preventDefault();
+        }
     }, false);
 
     return {
@@ -269,13 +280,7 @@ var gl4 = (function () {
 
         isPressed: function(key) {
             if (typeof key === 'string') {
-                key = {
-                    'space': 32,
-                    'left': 37,
-                    'up': 38,
-                    'right': 39,
-                    'down': 40,
-                }[key];
+                key = KEYCODE_BY_NAME[key];
             }
 
             return pressedKeys[key] !== undefined;
