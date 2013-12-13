@@ -538,7 +538,6 @@ function on(condition/*, ...behaviors*/) {
         }
     }
 
-    console.log(condition);
     return gl4.register(function () {
         var result = condition(runBehaviors);
         // Allow conditions to return true instead of using the callback.
@@ -550,7 +549,7 @@ function on(condition/*, ...behaviors*/) {
 
 function mouseDown() {
     return function () {
-        gl4.mouse.isDown;
+        return gl4.mouse.isDown;
     }
 }
 
