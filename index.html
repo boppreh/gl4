@@ -7,23 +7,25 @@
     </head>
 
     <body style='background: black;'>
-        <canvas id='canvas' width=800 height=600 style='background: white;'></canvas>
-        <script type='text/javascript' src='gl4.js'></script>
+        <canvas id='canvas' width=800 height=600 style='display: block; background: white; margin-left: auto; margin-right: auto;'></canvas>
 
+        <script type='text/javascript' src='gl4.js'></script>
         <script>
 //window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-var points = gl4.createText('0', 'points');
+var points = gl4.createText('0', 'points', {}, {}, {}, {'font': '144px Impact'});
 var star = gl4.createImg('star.png', 'star', {}, {}, {x: 0.01, y: 0.1, angle: 0.3}); 
-gl4.register(points.increment);
+
 push('star', {y: 2});
 reflect('star');
-on(function () { return star.pos.y > 580; }, points.zero);
 on(mouseDown(),
+   points.decrement,
    on(hit('star', 'mouse'),
       push('star', {y: -20}),
-      follow('star', 'mouse', -2, 100)));
+      follow('star', 'mouse', -2, NaN)));
 
+gl4.register(points.increment);
+on(function () { return star.pos.y > 580; }, points.zero);
 on(keyDown('space'), push('points', {angle: 0.5}));
         </script>
     </body>
