@@ -14,6 +14,8 @@
 //window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
 var points = gl4.createText('0', 'points', {}, {}, {}, {'font': '144px Impact'});
+var max = gl4.createText('0', [], {x: 800, y: 22}, {}, {},
+                         {'textAlign': 'right', 'font': '26px Impact'});
 var star = gl4.createImg('star.png', 'star', {}, {}, {x: 0.01, y: 0.1, angle: 0.3}); 
 
 push('star', {y: 2});
@@ -27,6 +29,12 @@ on(mouseDown(),
 gl4.register(points.increment);
 on(function () { return star.pos.y > 580; }, points.zero);
 on(keyDown('space'), push('points', {angle: 0.5}));
+
+gl4.register(function() {
+    if (points.text > max.text) {
+        max.text = points.text;
+    }
+});
         </script>
     </body>
 </html>
