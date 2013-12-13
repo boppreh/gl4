@@ -13,14 +13,18 @@
         <script>
 //window.onclick = function() { gl4.isRunning() ? gl4.stop() : gl4.start(); }
 
-gl4.create('star.png', ['star'],
-           {x: 200, y: 200}, {}, {x: 0.01, y: 0.1, angle: 0.3}); 
+var points = gl4.createText('0', 'points');
+var star = gl4.createImg('star.png', 'star', {}, {}, {x: 0.01, y: 0.1, angle: 0.3}); 
+gl4.register(points.increment);
 push('star', {y: 2});
 reflect('star');
+on(function () { return star.pos.y > 580; }, points.zero);
 on(mouseDown(),
    on(hit('star', 'mouse'),
       push('star', {y: -20}),
       follow('star', 'mouse', -2, 100)));
+
+on(keyDown('space'), push('points', {angle: 0.5}));
         </script>
     </body>
 </html>

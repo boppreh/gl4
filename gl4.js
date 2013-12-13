@@ -76,7 +76,7 @@ var gl4 = (function () {
             context.save();
             context.translate(object.pos.x, object.pos.y);
             context.rotate(-object.pos.angle);
-            context.drawImage(object.img, -object.size.x / 2, -object.size.y / 2);
+            object.drawIn(context);
             context.restore();
 
             if (debug) {
@@ -151,6 +151,64 @@ var gl4 = (function () {
         }
 
         cartesianProduct(tags, []);
+    }
+
+    function createEmptyObject(objTags, pos, inertia, friction) {
+        if (objTags === undefined) {
+            objTags = [];
+        } else if (typeof objTags === "string") {
+            objTags = [objTags]
+        }
+
+        // Takes an object and fills empty values with defaults.
+        function d(original, def) {
+            original = original || {};
+            var obj = {};
+
+            for (var property in def) {
+                var cur = original[property];
+                obj[property] = cur !== undefined ? cur : def[property];
+            }
+
+            return obj;
+        }
+
+        var obj = {
+            tags: objTags,
+            pos: d(pos, {x: canvas.width / 2, y: canvas.height / 2, angle: 0}),
+            inertia: d(inertia, {x: 0, y: 0, angle: 0}),
+            friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
+            size: {x: 0, y: 0},
+
+            drawIn: function (context) {
+                console.error('Can\'t draw an empty object!')
+            },
+
+            move: function (speed) {
+                this.pos.x += speed.x || 0;
+                this.pos.y += speed.y || 0;
+                this.pos.angle += speed.angle || 0;
+                while (this.pos.angle < 0) {
+                    this.pos.angle += Math.PI * 2;
+                }
+                while (this.pos.angle > Math.PI * 2) {
+                    this.pos.angle -= Math.PI * 2;
+                }
+            },
+
+            push: function (acceleration) {
+                this.inertia.x += acceleration.x || 0;
+                this.inertia.y += acceleration.y || 0;
+                this.inertia.angle += acceleration.angle || 0;
+            }
+        };
+
+        objects.push(obj);
+        objTags.forEach(function (tag) {
+            tagged(tag).push(obj);
+        });
+
+        return obj;
     }
 
     window.addEventListener('mousemove', function (event) {
@@ -257,7 +315,7 @@ var gl4 = (function () {
         },
 
         /**
-         * Manually creates a new object.
+         * Manually creates a new image object.
          *
          * `imageSource` is a URL pointing to an image.
          * `objTags` is an array of the tags the object will have.
@@ -265,63 +323,41 @@ var gl4 = (function () {
          * `inertia` is a {x, y, angle} dict of the desired initial inertia.
          * `friction` is a {x, y, angle} dict of the desired initial friction.
          */
-        create: function (imageSource, objTags, pos, inertia, friction) {
-            if (typeof objTags === "string") {
-                objTags = [objTags]
-            }
-
-            // Takes an object and fills empty values with defaults.
-            function d(original, def) {
-                original = original || {};
-                var obj = {};
-
-                for (var property in def) {
-                    var cur = original[property];
-                    obj[property] = cur !== undefined ? cur : def[property];
-                }
-
-                return obj;
-            }
-
-            var obj = {
-                tags: objTags,
-                pos: d(pos, {x: 0, y: 0, angle: 0}),
-                inertia: d(inertia, {x: 0, y: 0, angle: 0}),
-                friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
-                img: new Image(),
-
-                move: function (speed) {
-                    this.pos.x += speed.x || 0;
-                    this.pos.y += speed.y || 0;
-                    this.pos.angle += speed.angle || 0;
-                    while (this.pos.angle < 0) {
-                        this.pos.angle += Math.PI * 2;
-                    }
-                    while (this.pos.angle > Math.PI * 2) {
-                        this.pos.angle -= Math.PI * 2;
-                    }
-                },
-
-                push: function (acceleration) {
-                    this.inertia.x += acceleration.x || 0;
-                    this.inertia.y += acceleration.y || 0;
-                    this.inertia.angle += acceleration.angle || 0;
-                }
+        createImg: function (imageSource, objTags, pos, inertia, friction) {
+            var obj = createEmptyObject(objTags, pos, inertia, friction);
+            obj.img = new Image();
+            obj.drawIn = function (context) {
+                context.drawImage(this.img, -this.size.x / 2, -this.size.y / 2);
             };
 
             nLoading++;
             obj.img.onload = function () {
                 nLoading--;
                 obj.size = {x: obj.img.width, y: obj.img.height}
-
-                objects.push(obj);
-                objTags.forEach(function (tag) {
-                    tagged(tag).push(obj);
-                });
             };
             obj.img.src = imageSource;
 
             // Warning! Object has not been completely loaded yet.
+            return obj;
+        },
+
+        createText: function (text, objTags, pos, inertia, friction, textProperties) {
+            var obj = createEmptyObject(objTags, pos, inertia, friction);
+            obj.text = text;
+            obj.zero = function () { obj.text = 0; };
+            obj.increment = function () { obj.text++; };
+            obj.decrement = function () { obj.text--; };
+            obj.isZero = function () { obj.text == 0; };
+            obj.isPositive = function () { obj.text > 0; };
+            obj.isNegative = function () { obj.text < 0; };
+            obj.drawIn = function (context) {
+                context.textAlign = 'center';
+                for (var property in textProperties) {
+                    context[property] = textProperties[property];
+                }
+                context.fillText(obj.text, 0, 0);
+            };
+
             return obj;
         },
 
@@ -335,8 +371,10 @@ var gl4 = (function () {
         start: function (debugMode) {
             debug = debugMode || debug;
 
-            window.requestAnimationFrame(run);
-            running = true;
+            if (!running) {
+                window.requestAnimationFrame(run);
+                running = true;
+            }
         },
 
         /**
@@ -550,13 +588,13 @@ function on(condition/*, ...behaviors*/) {
 function mouseDown() {
     return function () {
         return gl4.mouse.isDown;
-    }
+    };
 }
 
 function keyDown(key) {
     return function() {
         return gl4.isPressed(key);
-    }
+    };
 }
 
 function hit(objectTag, targetTag) {
@@ -570,7 +608,7 @@ function hit(objectTag, targetTag) {
                 callback(object, target);
             }
         });
-    }
+    };
 }
 
 /**
@@ -609,4 +647,4 @@ function r(minValues, maxValues) {
     return obj;
 }
 
-gl4.start(true);
+gl4.start();
