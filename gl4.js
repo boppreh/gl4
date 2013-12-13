@@ -613,6 +613,12 @@ function mouseDown() {
     };
 }
 
+function mouseUp() {
+    return function () {
+        return !gl4.mouse.isDown;
+    };
+}
+
 function keyDown(key) {
     return function() {
         return gl4.isPressed(key);
