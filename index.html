@@ -8,6 +8,9 @@
 
     <body style='background: black;'>
         <canvas id='canvas' width=800 height=600 style='display: block; background: white; margin-left: auto; margin-right: auto;'></canvas>
+        <audio autoplay loop>
+            <source src="http://opengameart.org/sites/default/files/2531My%20new%20favorite%2C%20even%20with%20reason!%20_0.ogg" type="audio/ogg" />
+        </audio>
 
         <script type='text/javascript' src='gl4.js'></script>
         <script>
@@ -23,6 +26,7 @@ reflect('star');
 on(mouseDown(),
    points.decrement,
    on(hit('star', 'mouse'),
+      sound('http://opengameart.org/sites/default/files/jumpland.wav'),
       push('star', {y: -20}),
       follow('star', 'mouse', -2, NaN)));
 
