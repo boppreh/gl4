@@ -212,11 +212,15 @@ var gl4 = (function () {
     }
 
     window.addEventListener('mousemove', function (event) {
-        mouse.inertia.x = event.clientX - mouse.pos.x;
-        mouse.inertia.y = event.clientY - mouse.pos.y;
+        var canvasBounds = canvas.getBoundingClientRect();
+        var mouseX = event.clientX - canvasBounds.left,
+            mouseY = event.clientY - canvasBounds.top;
 
-        mouse.pos.x = event.clientX;
-        mouse.pos.y = event.clientY;
+        mouse.inertia.x = mouseX - mouse.pos.x;
+        mouse.inertia.y = mouseY - mouse.pos.y;
+
+        mouse.pos.x = mouseX;
+        mouse.pos.y = mouseY;
     }, false);
 
     window.addEventListener('mousedown', function (event) {
