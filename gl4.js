@@ -29,6 +29,7 @@ var gl4 = (function () {
         behaviors = {},
         // Used for generating unique ids for behaviors.
         behaviorCount = 0,
+        objectCount = 0,
         // Number of images still loading.
         nLoading = 0,
         debug = false,
@@ -135,7 +136,7 @@ var gl4 = (function () {
 
     function tagged(tag) {
         if (tags[tag] == undefined) {
-            tags[tag] = [];
+            tags[tag] = {};
         }
         return tags[tag];
     }
@@ -146,12 +147,16 @@ var gl4 = (function () {
             callback = args.slice(-1)[0];
 
         function cartesianProduct(tags, parameters) {
+            if (tags.length == 0) {
+                callback.apply(callback, parameters);
+                return;
+            }
+            
             var firstList = tagged(tags[0]),
                 rest = tags.slice(1),
                 nPrevious = parameters.length;
 
-            if (firstList.length == 0) {
-                callback.apply(callback, parameters);
+            if (firstList.length === 0) {
                 return;
             }
 
@@ -165,11 +170,11 @@ var gl4 = (function () {
         cartesianProduct(tags, []);
     }
 
-    function createEmptyObject(objTags, pos, inertia, friction) {
-        if (objTags === undefined) {
-            objTags = [];
-        } else if (typeof objTags === "string") {
-            objTags = [objTags]
+    function createEmptyObject(tagsList, pos, inertia, friction) {
+        if (tagsList === undefined) {
+            tagsList = [];
+        } else if (typeof tagsList === "string") {
+            tagsList = [tagsList]
         }
 
         // Takes an object and fills empty values with defaults.
@@ -186,7 +191,8 @@ var gl4 = (function () {
         }
 
         var obj = {
-            tags: objTags,
+            id: objectCount++,
+            tags: {},
             pos: d(pos, {x: canvas.width / 2, y: canvas.height / 2, angle: 0}),
             inertia: d(inertia, {x: 0, y: 0, angle: 0}),
             friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
@@ -216,8 +222,9 @@ var gl4 = (function () {
         };
 
         objects.push(obj);
-        objTags.forEach(function (tag) {
-            tagged(tag).push(obj);
+        tagsList.forEach(function (tag) {
+            tagged(tag)[obj.id] = obj;
+            obj.tags[tag] = tag;
         });
 
         return obj;
@@ -569,6 +576,20 @@ function shoot(origin, imgSource, tags, force, friction) {
                        y: sin * force};
 
         gl4.create(imgSource, tags, pos, inertia, friction);
+    });
+}
+
+function tag(targets, tag) {
+    return gl4.register(targets, function (target) {
+        target.tags[tag] = tag;
+        gl4.tagged(tag)[target.id] = target;
+    });
+}
+
+function untag(targets, tag) {
+    return gl4.register(targets, function (target) {
+        delete target.tags[tag];
+        delete gl4.tagged(tag)[target.id];
     });
 }
 
