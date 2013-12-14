@@ -28,16 +28,8 @@ var gl4 = (function () {
         secondsElapsed = 0,
 
         running = false,
-        objects = [],
-        // Pseudo-object. Exists, but is not rendered or updated in `step`.
-        mouse = {pos: {x: 0, y: 0, angle: 0},
-                 inertia: {x: 0, y: 0, angle: 0},
-                 size: {x: 0, y: 0},
-                 isDown: false},
-        screen = {pos: {x: canvas.width / 2, y: canvas.height / 2, angle: 0},
-                  inertia: {x: 0, y: 0, angle: 0},
-                  size: {x: canvas.width, y: canvas.height}},
-        tags = {'mouse': [mouse], 'screen': [screen]},
+        objects = {},
+        tags = {},
         // Behaviors use a dictionary for cheap insertion and deletion.
         behaviors = {},
         // Used for generating unique ids for behaviors.
@@ -60,6 +52,21 @@ var gl4 = (function () {
         
         frameRequestId = 0;
 
+    var mouse = createEmptyObject(['mouse'],
+                                  {x: 0, y: 0, angle: 0},
+                                  {x: 0, y: 0, angle: 0})
+    mouse.size = {x: 0, y: 0};
+    mouse.isDown = false;
+    // Avoid rendering.
+    delete objects[mouse.id];
+
+    var screen = createEmptyObject(['screen'],
+                                   {x: canvas.width / 2, y: canvas.height / 2, angle: 0},
+                                   {x: 0, y: 0, angle: 0})
+    screen.size = {x: canvas.width, y: canvas.height};
+    // Avoid rendering.
+    delete objects[screen.id];
+
     context.textAlign = 'right'
     context.fillStyle = 'green';
     context.font = 'bold 16px Verdana';
@@ -72,7 +79,7 @@ var gl4 = (function () {
         fps = (1000 / frameTime).toFixed(1);
 
         context.fillText(fps + ' fps', canvas.width, 20);
-        context.fillText(objects.length + ' objects', canvas.width, 36);
+        context.fillText(Object.keys(objects).length + ' objects', canvas.width, 36);
     }
 
     function run() {
@@ -250,7 +257,7 @@ var gl4 = (function () {
 
     function add(object, tagsList) {
         object.id = ++objectCount;
-        objects.push(object);
+        objects[object.id] = object;
 
         if (tagsList) {
             tagsList.forEach(function (tag) {
@@ -261,7 +268,7 @@ var gl4 = (function () {
     }
 
     function remove(object) {
-        objects.splice(objects.indexOf(object), 1);
+        delete objects[object.id];
         for (var tag in object.tags) {
             delete tagged(tag)[object.id];
             delete object.tags[tag];
@@ -465,7 +472,7 @@ var gl4 = (function () {
 
         clear: function () {
             tags = {'mouse': [mouse], 'screen': [screen]};
-            objects = [];
+            objects = {};
             behaviors = {};
         },
     };
