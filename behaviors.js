@@ -215,3 +215,46 @@ function destroy(tag) {
         gl4.remove(object);
     });
 }
+
+function applyEffect(tag, effect) {
+    var previousTagged = [];
+    gl4.register(function () {
+        previousTagged.forEach(function (object) {
+            object.effects.splice(object.effects.indexOf(effect), 1);
+        });
+    });
+    return gl4.register(tag, function (object) {
+        previousTagged.push(object);
+        object.effects.push(effect);
+    });
+}
+
+function glow(object, color, size) {
+    return applyEffect(object, function (context) {
+        context.shadowColor = color;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+        context.shadowBlur = size;
+    });
+}
+
+function shadow(object, offsetX, offsetY, blur, color) {
+    color = color === undefined ? 'black' : color;
+    blur = blur === undefined ? 3 : blur;
+    offsetX = offsetX === undefined ? 1 : offsetX;
+    offsetY = offsetY === undefined ? 1 : offsetY;
+
+    return applyEffect(object, function (context) {
+        context.shadowColor = color;
+        context.shadowOffsetX = offsetX;
+        context.shadowOffsetY = offsetY;
+        context.shadowBlur = blur;
+    });
+}
+
+function alpha(object, amount) {
+    amount = amount === undefined ? 0.5 : amount;
+    return applyEffect(object, function (context) {
+       context.globalAlpha -= 1 - amount;
+   });
+}
