@@ -187,3 +187,8 @@ function sound(src) {
     });
 }
 
+function destroy(tag) {
+    return gl4.register(tag, function (object) {
+        gl4.remove(object);
+    });
+}

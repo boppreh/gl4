@@ -201,7 +201,6 @@ var gl4 = (function () {
         }
 
         var obj = {
-            id: objectCount++,
             tags: {},
             pos: d(pos, {x: canvas.width / 2, y: canvas.height / 2, angle: 0}),
             inertia: d(inertia, {x: 0, y: 0, angle: 0}),
@@ -211,7 +210,7 @@ var gl4 = (function () {
             effects: [],
 
             drawIn: function (context) {
-                console.error('Can\'t draw an empty object!')
+                console.error('Can\'t draw an empty object!', this)
             },
 
             move: function (speed) {
@@ -232,14 +231,29 @@ var gl4 = (function () {
                 this.inertia.angle += acceleration.angle || 0;
             }
         };
-
-        objects.push(obj);
-        tagsList.forEach(function (tag) {
-            tagged(tag)[obj.id] = obj;
-            obj.tags[tag] = tag;
-        });
+        add(obj, tagsList);
 
         return obj;
+    }
+
+    function add(object, tagsList) {
+        object.id = ++objectCount;
+        objects.push(object);
+
+        if (tagsList) {
+            tagsList.forEach(function (tag) {
+                tagged(tag)[object.id] = object;
+                object.tags[tag] = tag;
+            });
+        }
+    }
+
+    function remove(object) {
+        objects.splice(objects.indexOf(object), 1);
+        for (var tag in object.tags) {
+            delete tagged(tag)[object.id];
+            delete object.tags[tag];
+        }
     }
 
     window.addEventListener('mousemove', function (event) {
@@ -278,6 +292,9 @@ var gl4 = (function () {
 
     return {
         mouse: mouse,
+
+        add: add,
+        remove: remove,
 
         isRunning: function () {
             return running;
