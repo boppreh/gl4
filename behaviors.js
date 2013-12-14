@@ -28,8 +28,8 @@ function push(target, acceleration) {
 /**
  * Accelerates tagged objects in direction to tagged targets.
  */
-function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
-    force = force !== undefined ? force : 5;
+function attract(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
+    attract = force !== undefined ? force : 5;
     turningSpeed = turningSpeed !== undefined ? turningSpeed : Math.PI;
     maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
     var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;

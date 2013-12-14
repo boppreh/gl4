@@ -6,6 +6,7 @@ Fixes
 - Eager image prefetching in 'Create' behavior
 - Preload sounds
 - Add more keys to 'isPressed'
+- Cache effects and images drawn for faster rendering
 
 
 New Features
