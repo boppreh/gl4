@@ -275,6 +275,39 @@ var gl4 = (function () {
         }
     }
 
+    /**
+     * Starts running the simulation. `debugMode` specifies if the FPS
+     * counter and tag annotations will appear.
+     *
+     * If not provided, `debugMode` falls back to the last value used
+     * (defaults to `false`).
+     */
+    function start(debugMode) {
+        debug = debugMode || debug;
+
+        if (!running) {
+            window.requestAnimationFrame(run);
+            running = true;
+        }
+    }
+
+    /**
+     * Stops running the simulation.
+     */
+    function stop() {
+        running = false;
+
+        if (frameRequestId !== 0) {
+            window.cancelAnimationFrame(frameRequestId);
+        }
+
+        if (debug) {
+            // This text will be automatically erased the next time the
+            // canvas is cleaned.
+            context.fillText('PAUSED', canvas.width, 52);
+        }
+    }
+
     window.addEventListener('mousemove', function (event) {
         var canvasBounds = canvas.getBoundingClientRect();
         var mouseX = event.clientX - canvasBounds.left,
@@ -307,6 +340,10 @@ var gl4 = (function () {
         if (event.which in NAME_BY_KEYCODE) {
             event.preventDefault();
         }
+    }, false);
+
+    window.addEventListener('blur', function (event) {
+        stop();
     }, false);
 
     return {
@@ -437,38 +474,8 @@ var gl4 = (function () {
             return obj;
         },
 
-        /**
-         * Starts running the simulation. `debugMode` specifies if the FPS
-         * counter and tag annotations will appear.
-         *
-         * If not provided, `debugMode` falls back to the last value used
-         * (defaults to `false`).
-         */
-        start: function (debugMode) {
-            debug = debugMode || debug;
-
-            if (!running) {
-                window.requestAnimationFrame(run);
-                running = true;
-            }
-        },
-
-        /**
-         * Stops running the simulation.
-         */
-        stop: function () {
-            running = false;
-
-            if (frameRequestId !== 0) {
-                window.cancelAnimationFrame(frameRequestId);
-            }
-
-            if (debug) {
-                // This text will be automatically erased the next time the
-                // canvas is cleaned.
-                context.fillText('PAUSED', canvas.width, 52);
-            }
-        },
+        start: start,
+        stop: stop,
 
         clear: function () {
             tags = {'mouse': [mouse], 'screen': [screen]};
