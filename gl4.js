@@ -407,9 +407,9 @@ var gl4 = (function () {
             obj.zero = function () { obj.text = 0; };
             obj.increment = function () { obj.text++; };
             obj.decrement = function () { obj.text--; };
-            obj.isZero = function () { obj.text == 0; };
-            obj.isPositive = function () { obj.text > 0; };
-            obj.isNegative = function () { obj.text < 0; };
+            obj.isZero = function () { return obj.text == 0; };
+            obj.isPositive = function () { return obj.text > 0; };
+            obj.isNegative = function () { return obj.text < 0; };
             obj.drawIn = function (context) {
                 context.textAlign = 'center';
                 for (var property in textProperties) {
@@ -452,6 +452,12 @@ var gl4 = (function () {
                 // canvas is cleaned.
                 context.fillText('PAUSED', canvas.width, 52);
             }
+        },
+
+        clear: function () {
+            tags = {'mouse': [mouse], 'screen': [screen]};
+            objects = [];
+            behaviors = {};
         },
     };
 }());
