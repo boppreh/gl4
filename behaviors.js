@@ -82,7 +82,7 @@ function attract(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
 function create(img, tags, pos, inertia, friction) {
     return gl4.register(function () {
         var tagsCopy = tags.slice();
-        gl4.create(img, tagsCopy, pos, inertia, friction);
+        gl4.createImg(img, tagsCopy, pos, inertia, friction);
     });
 }
 
@@ -161,6 +161,15 @@ function shoot(origin, imgSource, tags, force, friction) {
                        y: sin * force};
 
         gl4.createImg(imgSource, tags, pos, inertia, friction);
+    });
+}
+
+function slowDown(tag, multiplier) {
+    multiplier = fillDefault(multiplier, {x: 0.5, y: 0.5, angle: 0.5});
+    return gl4.register(tag, function (object) {
+        object.inertia.x *= multiplier.x;
+        object.inertia.y *= multiplier.y;
+        object.inertia.angle *= multiplier.angle;
     });
 }
 
