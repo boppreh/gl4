@@ -19,3 +19,10 @@ function shadow(offsetX, offsetY, blur, color) {
         context.shadowBlur = blur;
     }
 }
+
+function alpha(amount) {
+    amount = amount === undefined ? 0.5 : amount;
+   return function (context) {
+       context.globalAlpha -= 1 - amount;
+   } 
+}
