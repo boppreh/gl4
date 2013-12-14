@@ -164,12 +164,12 @@ function shoot(origin, imgSource, tags, force, friction) {
     });
 }
 
-function slowDown(tag, multiplier) {
-    multiplier = fillDefault(multiplier, {x: 0.5, y: 0.5, angle: 0.5});
+function slowDown(tag, slowness) {
+    slowness = fillDefault(slowness, {x: 0.5, y: 0.5, angle: 0.5});
     return gl4.register(tag, function (object) {
-        object.inertia.x *= multiplier.x;
-        object.inertia.y *= multiplier.y;
-        object.inertia.angle *= multiplier.angle;
+        object.inertia.x *= 1 - slowness.x;
+        object.inertia.y *= 1 - slowness.y;
+        object.inertia.angle *= 1 - slowness.angle;
     });
 }
 
