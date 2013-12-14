@@ -458,7 +458,7 @@ function push(target, acceleration) {
  */
 function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
     force = force !== undefined ? force : 5;
-    turningSpeed = turningSpeed !== undefined ? turningSpeed : 30;
+    turningSpeed = turningSpeed !== undefined ? turningSpeed : Math.PI;
     maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
     var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;
 
