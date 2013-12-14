@@ -34,7 +34,7 @@ function on(condition/*, ...behaviors*/) {
 }
 
 function mouseDown(objectTag) {
-    objectTag = objectTag || 'mouse';
+    objectTag = objectTag || 'screen';
     return function (callback) {
         if (!gl4.mouse.isDown) {
             return;
@@ -78,10 +78,10 @@ function not(condition) {
 
 function or(/*conditions*/) {
     var conditions = Array.prototype.slice.call(arguments, 0);
-    return function () {
+    return function (callback) {
         var result = false;
         conditions.forEach(function (condition) {
-            result = condition.apply(condition, arguments) || result;
+            result = condition(callback) || result;
         });
         return result;
     }
