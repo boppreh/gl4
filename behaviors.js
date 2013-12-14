@@ -12,7 +12,6 @@ function moveTo(sourceTag, targetTag) {
     return gl4.register(sourceTag, targetTag, function (source, target) {
         source.pos.x = target.pos.x;
         source.pos.y = target.pos.y;
-        source.pos.angle = target.pos.angle;
     });
 }
 
