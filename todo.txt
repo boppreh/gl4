@@ -5,17 +5,14 @@ Fixes
 - Make tests
 - Eager image prefetching in 'Create' behavior
 - Preload sounds
-- Add more keys to 'isPressed'
 - Cache effects and images drawn for faster rendering
 
 
 New Features
 ============
 
-! Add object destruction
 + Add object/area collision (or Area objects?)
 + Add object/object collision with pixel checking
-+ Add resource system
 - Use frame-invariable physics steps (RK4?)
 - Add object/object collision with circles
 - Use multiple layers to draw (allows Z coordinates and UI/Game separation)
@@ -25,12 +22,9 @@ New Features
 System suggestions
 ==================
 
-! Use OOP for creating Behaviors
-! Allow objects found by conditionals to be used by behaviors
-+ Remove 'tags' from 'register' and use 'bind' function
-+ Include effects support
+! `layer` and `unlayer`, with individual pausing
+! Use OOP for creating Behaviors, objects and Conditions
 + Include animation support
-- Split conditionals into 'On' function and test
 ~ Include online multiplayer support
 ? Include tile support (different types of layers?)
 ? Allow multiple GL4 objects (which one will the behaviors use?)
@@ -44,14 +38,12 @@ New Behaviors
 - Sight
 ~ Keyboard control (angular and not)
 ~ Show health
-? Tag/Untag (or use GL4 function only?)
 
 
 New Conditions
 ==============
 
-! Mouse Down/Up/Move/Over
-+ Up/Down (key)
+! Mouse Move/Over
 + Pulse
 + Time
 + Destruction
@@ -60,8 +52,6 @@ New Conditions
 - Movement
 ~ Key (pressed) (use Key Up or smooth out Key Down?)
 ~ Creation
-~ Operators (not, and, or)
-? Test
 ? Exists (run over single item?)
 
 
