@@ -160,7 +160,7 @@ function shoot(origin, imgSource, tags, force, friction) {
             inertia = {x: cos * force,
                        y: sin * force};
 
-        gl4.create(imgSource, tags, pos, inertia, friction);
+        gl4.createImg(imgSource, tags, pos, inertia, friction);
     });
 }
 
