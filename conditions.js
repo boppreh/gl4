@@ -54,11 +54,7 @@ function keyDown(key) {
 function hit(objectTag, targetTag) {
     return function(callback) {
         gl4.forEach(objectTag, targetTag, function(object, target) {
-            if (!(object.pos.x - object.size.x / 2 > target.pos.x + target.size.x / 2 ||
-                  object.pos.x + object.size.x / 2 < target.pos.x - target.size.x / 2 ||
-                  object.pos.y - object.size.y / 2 > target.pos.y + target.size.y / 2 ||
-                  object.pos.y + object.size.y / 2 < target.pos.y - target.size.y / 2)) {
-
+            if (object.hitTest(target)) {
                 callback(object, target);
             }
         });

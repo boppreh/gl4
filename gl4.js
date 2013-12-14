@@ -216,6 +216,13 @@ var gl4 = (function () {
                 console.error('Can\'t draw an empty object!', this)
             },
 
+            hitTest: function (other) {
+                return !(this.pos.x - this.size.x / 2 > other.pos.x + other.size.x / 2 ||
+                  this.pos.x + this.size.x / 2 < other.pos.x - other.size.x / 2 ||
+                  this.pos.y - this.size.y / 2 > other.pos.y + other.size.y / 2 ||
+                  this.pos.y + this.size.y / 2 < other.pos.y - other.size.y / 2)
+            },
+
             move: function (speed) {
                 this.pos.x += speed.x || 0;
                 this.pos.y += speed.y || 0;
