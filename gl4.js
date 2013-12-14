@@ -100,23 +100,25 @@ var gl4 = (function () {
             var object = objects[i];
             context.save();
             context.translate(object.pos.x, object.pos.y);
+
+            if (debug) {
+                // Print all tags on top right corner of object, one below the
+                // other.
+                var i = 0;
+                for (var tag in object.tags) {
+                    var x = object.size.x / 2,
+                        y = -object.size.y / 2 + i++ * 16;
+
+                    context.fillText(tag, x, y);
+                }
+            }
+
             context.rotate(-object.pos.angle);
             for (var i in object.effects) {
                 object.effects[i](context);
             }
             object.drawIn(context);
             context.restore();
-
-            if (debug) {
-                // Print all tags on top right corner of object, one below the
-                // other.
-                for (var i = 0; i < object.tags.length; i++) {
-                    var x = object.pos.x + object.size.x / 2,
-                        y = object.pos.y - object.size.y / 2 + i * 16;
-
-                    context.fillText(object.tags[i], x, y);
-                }
-            }
         }
     }
 
