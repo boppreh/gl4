@@ -33,9 +33,18 @@ function on(condition/*, ...behaviors*/) {
     });
 }
 
-function mouseDown() {
-    return function () {
-        return gl4.mouse.isDown;
+function mouseDown(objectTag) {
+    objectTag = objectTag || 'mouse';
+    return function (callback) {
+        if (!gl4.mouse.isDown) {
+            return;
+        }
+
+        gl4.forEach(objectTag, function (object) {
+            if (object.hitTest(gl4.mouse)) {
+                callback(object);
+            }
+        });
     };
 }
 
