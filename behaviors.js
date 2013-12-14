@@ -28,8 +28,8 @@ function push(target, acceleration) {
 /**
  * Accelerates tagged objects in direction to tagged targets.
  */
-function attract(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
-    attract = force !== undefined ? force : 5;
+function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
+    follow = force !== undefined ? force : 5;
     turningSpeed = turningSpeed !== undefined ? turningSpeed : Math.PI;
     maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
     var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;
@@ -73,6 +73,21 @@ function attract(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
         } else {
             object.pos.angle = findAngle(object.angle, difX, difY);
         }
+    });
+}
+
+function attract(objectTag, targetTag, constantForce, elasticForce) {
+    constantForce = constantForce === undefined ? 5 : constantForce;
+    elasticForce = elasticForce === undefined ? 0 : elasticForce;
+
+    gl4.register(objectTag, targetTag, function (object, target) { 
+        var difX = target.pos.x - object.pos.x,
+            difY = target.pos.y - object.pos.y,
+            angle = Math.atan2(difY, difX),
+            distance = Math.sqrt(difX * difX + difY * difY),
+            force = constantForce + distance * elasticForce;
+
+        object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
     });
 }
 
