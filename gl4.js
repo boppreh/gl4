@@ -78,13 +78,15 @@ var gl4 = (function () {
         frameTime += (timeDif - frameTime) / FRAME_TIME_FILTER;
         fps = (1000 / frameTime).toFixed(1);
 
-        context.fillText(fps + ' fps', canvas.width, 20);
-        context.fillText(Object.keys(objects).length + ' objects', canvas.width, 36);
+        secondsElapsed += timeDif / 1000;
+
+        if (debug) {
+            context.fillText(fps + ' fps', canvas.width, 20);
+            context.fillText(Object.keys(objects).length + ' objects', canvas.width, 36);
+        }
     }
 
     function run() {
-        secondsElapsed = (new Date - startTime) / 1000;
-
         if (!running) {
             // Will not request another frame and automatically stop running.
             return;
@@ -98,9 +100,7 @@ var gl4 = (function () {
             context.fillText('LOADING', canvas.width, 68);
         }
 
-        if (debug) {
-            updateFps();
-        }
+        updateFps();
 
         frameRequestId = window.requestAnimationFrame(run);
     }
@@ -284,6 +284,7 @@ var gl4 = (function () {
      */
     function start(debugMode) {
         debug = debugMode || debug;
+        lastLoop = new Date;
 
         if (!running) {
             window.requestAnimationFrame(run);
