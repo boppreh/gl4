@@ -679,6 +679,17 @@ function not(condition) {
     }
 }
 
+function or(/*conditions*/) {
+    var conditions = Array.prototype.slice.call(arguments, 0);
+    return function () {
+        var result = false;
+        conditions.forEach(function (condition) {
+            result = condition.apply(condition, arguments) || result;
+        });
+        return result;
+    }
+}
+
 /**
  * Plays a sound every time this behavior is run.
  */
