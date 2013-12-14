@@ -96,6 +96,9 @@ var gl4 = (function () {
             context.save();
             context.translate(object.pos.x, object.pos.y);
             context.rotate(-object.pos.angle);
+            for (var i in object.effects) {
+                object.effects[i](context);
+            }
             object.drawIn(context);
             context.restore();
 
@@ -204,6 +207,8 @@ var gl4 = (function () {
             inertia: d(inertia, {x: 0, y: 0, angle: 0}),
             friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
             size: {x: 0, y: 0},
+
+            effects: [],
 
             drawIn: function (context) {
                 console.error('Can\'t draw an empty object!')
