@@ -366,7 +366,11 @@ var gl4 = (function () {
 
         isPressed: function(key) {
             if (typeof key === 'string') {
-                key = KEYCODE_BY_NAME[key];
+                if (key.length === 1) {
+                    key = key.toUpperCase().charCodeAt(0);
+                } else {
+                    key = KEYCODE_BY_NAME[key];
+                }
             }
 
             return pressedKeys[key] !== undefined;
