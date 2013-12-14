@@ -113,3 +113,37 @@ function pulse(frequency, source, startAsTrue) {
         });
     }
 }
+
+function up(condition) {
+    var pastValues = {};
+    var pastResult = false;
+
+    return function(callback) {
+        var pastValuesUsed = {};
+
+        var fakeCallback = function () {
+            var ids = [];
+            for (var i in arguments) {
+                ids.push(arguments[i].id);
+            }
+            var key = String(ids);
+            if (!pastValues[key]) {
+                callback.apply(callback, arguments);
+            }
+            pastValues[key] = true;
+            pastValuesUsed[key] = true;
+        }
+
+        var result = condition(fakeCallback);
+        if (result === true && pastResult === false) {
+            callback();
+        }
+        pastResult = result;
+
+        for (var key in pastValues) {
+            if (pastValuesUsed[key] === undefined) {
+                pastValues[key] = false;
+            }
+        }
+    }
+}
