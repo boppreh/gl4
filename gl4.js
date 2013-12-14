@@ -331,14 +331,16 @@ var gl4 = (function () {
 
     window.addEventListener('keydown', function (event) {
         pressedKeys[event.which] = true;
-        if (event.which in NAME_BY_KEYCODE) {
+        if (event.which in NAME_BY_KEYCODE ||
+            (event.which >= 48 && event.which <= 90)) {
             event.preventDefault();
         }
     }, false);
 
     window.addEventListener('keyup', function (event) {
         delete pressedKeys[event.which];
-        if (event.which in NAME_BY_KEYCODE) {
+        if (event.which in NAME_BY_KEYCODE ||
+            (event.which >= 48 && event.which <= 90)) {
             event.preventDefault();
         }
     }, false);
