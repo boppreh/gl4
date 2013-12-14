@@ -13,5 +13,5 @@ of unusual syntax and opaque workings.
 Because this is a piece of mad science, there are no guarantees about
 stability, usability, existence and/or accuracy of documentation, or
 compatibility with any browser older than a few months or made by Microsoft. I
-do care about those guarantees, but the focus of this repository if
+do care about those guarantees, but the focus of this repository is
 experimentation.
