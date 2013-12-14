@@ -176,7 +176,9 @@ var gl4 = (function () {
                 rest = tags.slice(1),
                 nPrevious = parameters.length;
 
-            if (typeof tags[0] === 'string') {
+            if (tags[0] === undefined) {
+                firstList = MATCH_1;
+            } else if (typeof tags[0] === 'string') {
                 firstList = tagged(tags[0]); 
             } else {
                 firstList = tags[0];
