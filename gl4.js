@@ -10,6 +10,13 @@ if (window.requestAnimationFrame === undefined) {
     }
 }
 
+function Layer() {
+    this.objects = {};
+    this.tags = {};
+    this.behaviors = {};
+    this.paused = false;
+}
+
 var gl4 = (function () {
 
     var FRAME_TIME_FILTER = 10,
@@ -23,15 +30,12 @@ var gl4 = (function () {
 
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
+        layers = [new Layer()],
+        topLayer = layers[0],
 
         startTime = new Date,
         secondsElapsed = 0,
 
-        running = false,
-        objects = {},
-        tags = {},
-        // Behaviors use a dictionary for cheap insertion and deletion.
-        behaviors = {},
         // Used for generating unique ids for behaviors.
         behaviorCount = 0,
         objectCount = 0,
@@ -39,8 +43,6 @@ var gl4 = (function () {
         nLoading = 0,
         debug = false,
 
-        // Stores the currently playing sounds similarly to the behaviors.
-        sounds = {},
         soundsCount = 0,
 
         pressedKeys = {},
@@ -58,14 +60,14 @@ var gl4 = (function () {
     mouse.size = {x: 0, y: 0};
     mouse.isDown = false;
     // Avoid rendering.
-    delete objects[mouse.id];
+    delete topLayer.objects[mouse.id];
 
     var screen = createEmptyObject(['screen'],
                                    {x: canvas.width / 2, y: canvas.height / 2, angle: 0},
                                    {x: 0, y: 0, angle: 0})
     screen.size = {x: canvas.width, y: canvas.height};
     // Avoid rendering.
-    delete objects[screen.id];
+    delete topLayer.objects[screen.id];
 
     context.textAlign = 'right'
     context.fillStyle = 'green';
@@ -87,11 +89,6 @@ var gl4 = (function () {
     }
 
     function run() {
-        if (!running) {
-            // Will not request another frame and automatically stop running.
-            return;
-        }
-
         if (nLoading === 0) {
             // Not more images to load, safe to run.
             step();
@@ -106,30 +103,33 @@ var gl4 = (function () {
     }
 
     function render() {
-        for (var i in objects) {
-            var object = objects[i];
-            context.save();
-            context.translate(object.pos.x, object.pos.y);
+        layers.forEach(function (layer) {
+            for (var i in layer.objects) {
+                var object = layer.objects[i];
+                context.save();
+                context.translate(object.pos.x, object.pos.y);
 
-            if (debug) {
-                // Print all tags on top right corner of object, one below the
-                // other.
-                var i = 0;
-                for (var tag in object.tags) {
-                    var x = object.size.x / 2,
-                        y = -object.size.y / 2 + i++ * 16;
+                if (debug) {
+                    // Print all tags on top right corner of object, one below
+                    // the other.
+                    var i = 0;
+                    for (var tag in object.tags) {
+                        var x = object.size.x / 2,
+                            y = -object.size.y / 2 + i++ * 16;
 
-                    context.fillText(tag, x, y);
+                        context.fillText(tag, x, y);
+                    }
                 }
-            }
 
-            context.rotate(-object.pos.angle);
-            for (var i in object.effects) {
-                object.effects[i](context);
+                context.rotate(-object.pos.angle);
+                object.effects.forEach(function (effect) {
+                    effect(context);
+                });
+
+                object.drawIn(context);
+                context.restore();
             }
-            object.drawIn(context);
-            context.restore();
-        }
+        });
     }
 
     function clearCanvas() {
@@ -148,24 +148,30 @@ var gl4 = (function () {
     function step() {
         clearCanvas();
 
-        for (var i in objects) {
-            var object = objects[i];
-            object.move(object.inertia);
-            object.inertia.x *= (1 - object.friction.x);
-            object.inertia.y *= (1 - object.friction.y);
-            object.inertia.angle *= (1 - object.friction.angle);
-        }
+        layers.forEach(function (layer) {
+            if (layer.paused) {
+                return;
+            }
 
-        for (var id in behaviors) {
-            behaviors[id]();
-        }
+            for (var i in layer.objects) {
+                var object = layer.objects[i];
+                object.move(object.inertia);
+                object.inertia.x *= (1 - object.friction.x);
+                object.inertia.y *= (1 - object.friction.y);
+                object.inertia.angle *= (1 - object.friction.angle);
+            }
+
+            for (var i in layer.behaviors) {
+                layer.behaviors[i]();
+            }
+        });
     }
 
     function tagged(tag) {
-        if (tags[tag] == undefined) {
-            tags[tag] = {};
+        if (topLayer.tags[tag] == undefined) {
+            topLayer.tags[tag] = {};
         }
-        return tags[tag];
+        return topLayer.tags[tag];
     }
 
     function forEach(/*tags, callback*/) {
@@ -197,6 +203,7 @@ var gl4 = (function () {
 
             parameters.push(null);
             for (var i in firstList) {
+                var object = firstList[i];
                 parameters[nPrevious] = firstList[i];
                 cartesianProduct(rest, parameters);
             }
@@ -257,7 +264,7 @@ var gl4 = (function () {
 
     function add(object, tagsList) {
         object.id = ++objectCount;
-        objects[object.id] = object;
+        topLayer.objects[object.id] = object;
 
         if (tagsList) {
             tagsList.forEach(function (tag) {
@@ -268,44 +275,10 @@ var gl4 = (function () {
     }
 
     function remove(object) {
-        delete objects[object.id];
+        delete topLayer.objects[object.id];
         for (var tag in object.tags) {
             delete tagged(tag)[object.id];
             delete object.tags[tag];
-        }
-    }
-
-    /**
-     * Starts running the simulation. `debugMode` specifies if the FPS
-     * counter and tag annotations will appear.
-     *
-     * If not provided, `debugMode` falls back to the last value used
-     * (defaults to `false`).
-     */
-    function start(debugMode) {
-        debug = debugMode || debug;
-        lastLoop = new Date;
-
-        if (!running) {
-            window.requestAnimationFrame(run);
-            running = true;
-        }
-    }
-
-    /**
-     * Stops running the simulation.
-     */
-    function stop() {
-        running = false;
-
-        if (frameRequestId !== 0) {
-            window.cancelAnimationFrame(frameRequestId);
-        }
-
-        if (debug) {
-            // This text will be automatically erased the next time the
-            // canvas is cleaned.
-            context.fillText('PAUSED', canvas.width, 52);
         }
     }
 
@@ -353,6 +326,8 @@ var gl4 = (function () {
         stop();
     }, false);
 
+    run();
+
     return {
         mouse: mouse,
         screen: screen,
@@ -362,10 +337,6 @@ var gl4 = (function () {
 
         seconds: function () {
             return secondsElapsed;
-        },
-
-        isRunning: function () {
-            return running;
         },
 
         isPressed: function(key) {
@@ -427,7 +398,7 @@ var gl4 = (function () {
             }
 
             behavior.id = behaviorCount++;
-            behaviors[behavior.id] = behavior;
+            topLayer.behaviors[behavior.id] = behavior;
             return behavior;
         },
 
@@ -435,7 +406,7 @@ var gl4 = (function () {
          * Unregisters a previously registered behavior.
          */
         unregister: function (behavior) {
-            delete behaviors[behavior.id];
+            delete topLayer.behaviors[behavior.id];
         },
 
         /**
@@ -484,15 +455,6 @@ var gl4 = (function () {
 
             return obj;
         },
-
-        start: start,
-        stop: stop,
-
-        clear: function () {
-            tags = {'mouse': [mouse], 'screen': [screen]};
-            objects = {};
-            behaviors = {};
-        },
     };
 }());
 
@@ -523,6 +485,17 @@ function rand(minValues, maxValues) {
     return obj;
 }
 
+function randCircle(center, radius) {
+    var pos = {x: 0, y: 0};
+    gl4.register(function () {
+        var angle = Math.random() * Math.PI * 2;
+        pos.x = center.x + Math.cos(angle) * radius;
+        pos.y = center.y + Math.sin(angle) * radius;
+    });
+    return pos;
+}
+
+
 // Takes an object and fills empty values with defaults.
 function fillDefault(original, def) {
     original = original || {};
@@ -535,5 +508,3 @@ function fillDefault(original, def) {
 
     return obj;
 }
-
-gl4.start();
