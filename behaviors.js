@@ -80,12 +80,12 @@ function attract(objectTag, targetTag, constantForce, elasticForce) {
     constantForce = constantForce === undefined ? 5 : constantForce;
     elasticForce = elasticForce === undefined ? 0 : elasticForce;
 
-    gl4.register(objectTag, targetTag, function (object, target) { 
+    return gl4.register(objectTag, targetTag, function (object, target) { 
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y,
             angle = Math.atan2(difY, difX),
             distance = Math.sqrt(difX * difX + difY * difY),
-            force = constantForce + distance * elasticForce;
+            f = constantForce + 1 / distance * elasticForce;
 
         object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
     });
