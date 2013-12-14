@@ -34,7 +34,10 @@ var gl4 = (function () {
                  inertia: {x: 0, y: 0, angle: 0},
                  size: {x: 0, y: 0},
                  isDown: false},
-        tags = {'mouse': [mouse]},
+        screen = {pos: {x: canvas.width / 2, y: canvas.height / 2, angle: 0},
+                  inertia: {x: 0, y: 0, angle: 0},
+                  size: {x: canvas.width, y: canvas.height}},
+        tags = {'mouse': [mouse], 'screen': [screen]},
         // Behaviors use a dictionary for cheap insertion and deletion.
         behaviors = {},
         // Used for generating unique ids for behaviors.
@@ -292,6 +295,7 @@ var gl4 = (function () {
 
     return {
         mouse: mouse,
+        screen: screen,
 
         add: add,
         remove: remove,
