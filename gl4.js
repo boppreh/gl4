@@ -329,20 +329,24 @@ var gl4 = (function () {
         mouse.isDown = false;
     }, false);
 
-    window.addEventListener('keydown', function (event) {
-        pressedKeys[event.which] = true;
-        if (event.which in NAME_BY_KEYCODE ||
-            (event.which >= 48 && event.which <= 90)) {
+    function preventDefault(event) {
+        var hasCtrl = event.ctrlKey,
+            isKnownSpecial = event.which in NAME_BY_KEYCODE,
+            isAlpha = event.which >= 48 && event.which <= 90;
+
+        if (!hasCtrl && (isKnownSpecial || isAlpha)) {
             event.preventDefault();
         }
+    }
+
+    window.addEventListener('keydown', function (event) {
+        pressedKeys[event.which] = true;
+        preventDefault(event);
     }, false);
 
     window.addEventListener('keyup', function (event) {
         delete pressedKeys[event.which];
-        if (event.which in NAME_BY_KEYCODE ||
-            (event.which >= 48 && event.which <= 90)) {
-            event.preventDefault();
-        }
+        preventDefault(event);
     }, false);
 
     window.addEventListener('blur', function (event) {
