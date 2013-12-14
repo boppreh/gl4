@@ -24,6 +24,9 @@ var gl4 = (function () {
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
 
+        startTime = new Date,
+        secondsElapsed = 0,
+
         running = false,
         objects = [],
         // Pseudo-object. Exists, but is not rendered or updated in `step`.
@@ -70,6 +73,8 @@ var gl4 = (function () {
     }
 
     function run() {
+        secondsElapsed = (new Date - startTime) / 1000;
+
         if (!running) {
             // Will not request another frame and automatically stop running.
             return;
@@ -288,6 +293,10 @@ var gl4 = (function () {
 
         add: add,
         remove: remove,
+
+        seconds: function () {
+            return secondsElapsed;
+        },
 
         isRunning: function () {
             return running;

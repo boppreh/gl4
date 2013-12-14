@@ -81,3 +81,30 @@ function or(/*conditions*/) {
         return result;
     }
 }
+
+function pulse(frequency, source, startAsTrue) {
+    frequency = frequency || 1;
+    source = source === undefined ? [gl4.mouse] : source;
+    startAsTrue = startAsTrue === undefined ? true : startAsTrue;
+
+    var interval = 1 / frequency,
+        initialTimeAdded = startAsTrue ? 0 : interval,
+        nextPulseTimeBySource = {};
+
+    return function (callback) {
+        gl4.forEach(source, function (object) {
+            var nextPulseTime = nextPulseTimeBySource[object.id],
+                time = gl4.seconds();
+
+            if (!nextPulseTime) {
+                nextPulseTime = time + initialTimeAdded
+                nextPulseTimeBySource[object.id] = nextPulseTime;
+            }
+
+            if (nextPulseTime <= time) {
+                nextPulseTimeBySource[object.id] = time + interval;
+                callback(object);
+            }
+        });
+    }
+}
