@@ -193,24 +193,11 @@ var gl4 = (function () {
             tagsList = [tagsList]
         }
 
-        // Takes an object and fills empty values with defaults.
-        function d(original, def) {
-            original = original || {};
-            var obj = {};
-
-            for (var property in def) {
-                var cur = original[property];
-                obj[property] = cur !== undefined ? cur : def[property];
-            }
-
-            return obj;
-        }
-
         var obj = {
             tags: {},
-            pos: d(pos, {x: canvas.width / 2, y: canvas.height / 2, angle: 0}),
-            inertia: d(inertia, {x: 0, y: 0, angle: 0}),
-            friction: d(friction, {x: 0.8, y: 0.8, angle: 0.8}),
+            pos: fillDefault(pos, {x: canvas.width / 2, y: canvas.height / 2, angle: 0}),
+            inertia: fillDefault(inertia, {x: 0, y: 0, angle: 0}),
+            friction: fillDefault(friction, {x: 0.8, y: 0.8, angle: 0.8}),
             size: {x: 0, y: 0},
 
             effects: [],
@@ -458,13 +445,13 @@ var gl4 = (function () {
  * Returns an object with randomized attributes, between the given min and max
  * dictionary values. The attributes are re-randomized every frame.
  */
-function r(minValues, maxValues) {
+function rand(minValues, maxValues) {
     var obj = {};
 
     function update() {
         for (var property in minValues) {
-            var min = minValues[property];
-            var max = maxValues[property];
+            var min = minValues[property] || 0,
+                max = maxValues[property] || 0;
 
             if (max === undefined) {
                 obj[property] = min;
@@ -477,6 +464,19 @@ function r(minValues, maxValues) {
 
     gl4.register(update);
     update();
+
+    return obj;
+}
+
+// Takes an object and fills empty values with defaults.
+function fillDefault(original, def) {
+    original = original || {};
+    var obj = {};
+
+    for (var property in def) {
+        var cur = original[property];
+        obj[property] = cur !== undefined ? cur : def[property];
+    }
 
     return obj;
 }
