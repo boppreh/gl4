@@ -673,6 +673,12 @@ function hit(objectTag, targetTag) {
     };
 }
 
+function not(condition) {
+    return function () {
+        return !condition.apply(condition, arguments);
+    }
+}
+
 /**
  * Plays a sound every time this behavior is run.
  */
