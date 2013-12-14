@@ -162,9 +162,15 @@ var gl4 = (function () {
                 return;
             }
             
-            var firstList = tagged(tags[0]),
+            var firstList = null,
                 rest = tags.slice(1),
                 nPrevious = parameters.length;
+
+            if (typeof tags[0] === 'string') {
+                firstList = tagged(tags[0]); 
+            } else {
+                firstList = tags[0];
+            }
 
             if (firstList.length === 0) {
                 return;
@@ -183,7 +189,7 @@ var gl4 = (function () {
     function createEmptyObject(tagsList, pos, inertia, friction) {
         if (tagsList === undefined) {
             tagsList = [];
-        } else if (typeof tagsList === "string") {
+        } else if (typeof tagsList === 'string') {
             tagsList = [tagsList]
         }
 
