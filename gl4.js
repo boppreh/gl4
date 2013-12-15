@@ -52,15 +52,21 @@ gl4.layer = function (layer) {
 };
 
 gl4.unlayer = function (layer) {
+    if (layer !== undefined && this.layers.indexOf(layer) === -1) {
+        return;
+    }
     layer = layer || this.activeLayer;
     var index = this.layers.indexOf(layer)
     this.layers.splice(index, 1);
-    this.activeLayer = this.layers[index - 1] || this.layers[index];
+    if (layer === this.activeLayer) {
+        this.activeLayer = this.layers[index - 1] || this.layers[index];
+    }
     return layer;
 };
 
 gl4.unlayerAll = function () {
     this.layers = [this.layers[0]];
+    this.activeLayer = this.layers[0];
 }
 
 gl4.register = function () {
@@ -177,8 +183,6 @@ gl4.step = function () {
             layer.behaviors[i]();
         }
     });
-
-    this.activeLayer = layer;
 };
 
 gl4.processKeyEvent = function (event, value) {
@@ -556,9 +560,9 @@ function fillDefault(original, def) {
 }
 
 gl4.activeLayer = gl4.layers[0];
-gl4.mouse = new Entity(null, 'mouse');
+gl4.mouse = new Entity(null);
 gl4.mouse.isDown = false;
-gl4.screen = new Entity(null, 'screen',
+gl4.screen = new Entity(null, [],
                         {x: canvas.width / 2, y: canvas.height / 2},
                         {x: canvas.width, y: canvas.height});
 
