@@ -118,6 +118,8 @@ gl4.forEach = function (/*tags, callback*/) {
             firstList = MATCH_1;
         } else if (typeof tags[0] === 'string') {
             firstList = gl4.tagged(tags[0]); 
+        } else if (tags[0].id !== undefined) {
+            firstList = [tags[0]];
         } else {
             firstList = tags[0];
         }
