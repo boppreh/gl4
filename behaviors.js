@@ -28,7 +28,7 @@ function push(target, acceleration) {
  * Accelerates tagged objects in direction to tagged targets.
  */
 function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
-    follow = force !== undefined ? force : 5;
+    force = force !== undefined ? force : 5;
     turningSpeed = turningSpeed !== undefined ? turningSpeed : Math.PI;
     maxTolerableDistance = maxTolerableDistance !== undefined ? maxTolerableDistance : 10;
     var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;
@@ -94,10 +94,9 @@ function attract(objectTag, targetTag, constantForce, elasticForce) {
  * Creates a new object every time the behavior is run.
  */
 function create(img, tags, pos, inertia, friction) {
-    var layer = gl4.activeLayer;
     return gl4.register(function () {
         var tagsCopy = tags.slice();
-        layer.add(gl4.createImage(img, tagsCopy, pos, inertia, friction));
+        gl4.createImage(img, tagsCopy, pos, inertia, friction);
     });
 }
 
