@@ -230,6 +230,19 @@ function fadeOut(tag, speed) {
     });
 }
 
+function expand(tag, speed) {
+    if (speed === undefined) {
+        speed = {x: 0.01, y: 0.01};
+    } else if (typeof speed === 'number') {
+        speed = {x: speed, y: speed};
+    }
+
+    return gl4.register(tag, function (object) {
+        object.size.x *= 1 + speed.x;
+        object.size.y *= 1 + speed.y;
+    });
+}
+
 function glow(object, color, size) {
     size = size === undefined ? 8 : size;
     color = color === undefined ? 'white' : color;
