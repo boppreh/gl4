@@ -261,12 +261,12 @@ var gl4 = (function () {
 
             tag: function (tagName) {
                 this.tags[tagName] = tagName;
-                topLayer.tags[tagName][this.id] = this;
+                tagged(tagName)[this.id] = this;
             },
 
             untag: function (tagName) {
                 delete this.tags[tagName];
-                delete topLayer.tags[tagName][this.id];
+                delete tagged(tagName)[this.id];
             }
         };
         add(obj, tagsList);
