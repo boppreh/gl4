@@ -72,7 +72,9 @@ function mouseUp() {
 function click(target) {
     var clicked = {};
     var tagged;
-    if (typeof target === 'string') {
+    if (target === undefined) {
+        target = [gl4.screen];
+    } else if (typeof target === 'string') {
         tagged = gl4.tagged(target);
     } else if (target.id !== undefined) {
         tagged = [target];
