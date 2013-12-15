@@ -494,6 +494,9 @@ function ImageEntity(imageSource/*, rest of Entity params*/) {
     this.size = {x: this.image.width, y: this.image.height};
     this.draw = function (context) {
         if (this.image.width !== 0) {
+            context.scale(this.size.x / this.image.width,
+                          this.size.y / this.image.height);
+
             context.drawImage(this.image,
                               -this.image.width / 2, -this.image.height / 2);
         }
