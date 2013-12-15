@@ -22,7 +22,6 @@ var gl4 = {
 
     canvas: document.getElementById('canvas'),
     context: canvas.getContext('2d'),
-    tags: {},
     layers: [new Layer()],
     activeLayer: null,
     imgCache: {},
@@ -61,7 +60,7 @@ gl4.unlayer = function (layer) {
 };
 
 gl4.unlayerAll = function () {
-    this.layers.splice(1, this.layers.indexOf(this.activeLayer));
+    this.layers = [this.layers[0]];
 }
 
 gl4.register = function () {
@@ -97,10 +96,7 @@ gl4.createText = function () {
 };
 
 gl4.tagged = function (tag) {
-    if (this.tags[tag] === undefined) {
-        this.tags[tag] = {};
-    }
-    return this.tags[tag];
+    return this.activeLayer.tagged.apply(this.activeLayer, arguments);
 };
 
 gl4.forEach = function (/*tags, callback*/) {
@@ -164,10 +160,14 @@ gl4.render = function () {
 };
 
 gl4.step = function () {
+    var layer = this.activeLayer;
+
     this.layers.forEach(function (layer) {
         if (layer.paused) {
             return;
         }
+
+        gl4.activeLayer = layer;
 
         for (var i in layer.entities) {
             layer.entities[i].step();
@@ -177,6 +177,8 @@ gl4.step = function () {
             layer.behaviors[i]();
         }
     });
+
+    this.activeLayer = layer;
 };
 
 gl4.processKeyEvent = function (event, value) {
@@ -260,8 +262,16 @@ window.addEventListener('blur', function (event) {
 function Layer() {
     this.entities = {};
     this.behaviors = [];
+    this.tags = {};
     this.paused = false;
     this.behaviorCount = 0;
+}
+
+Layer.prototype.tagged = function(tag) {
+    if (this.tags[tag] === undefined) {
+        this.tags[tag] = {};
+    }
+    return this.tags[tag];
 }
 
 Layer.prototype.register = function (/*tag1, tag2, tag3, func*/) {
