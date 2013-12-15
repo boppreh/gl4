@@ -22,7 +22,7 @@ var gl4 = {
 
     canvas: document.getElementById('canvas'),
     context: canvas.getContext('2d'),
-    layers: [new Layer()],
+    layers: [],
     activeLayer: null,
     imgCache: {},
 
@@ -166,9 +166,10 @@ gl4.render = function () {
 };
 
 gl4.step = function () {
-    var layer = this.activeLayer;
+    var oldActiveLayer = this.activeLayer;
 
-    this.layers.forEach(function (layer) {
+    for (var i in this.layers) {
+        var layer = this.layers[i];
         if (layer.paused) {
             return;
         }
@@ -181,8 +182,17 @@ gl4.step = function () {
 
         for (var i in layer.behaviors) {
             layer.behaviors[i]();
+            if (gl4.activeLayer !== layer) {
+                // Someone is messing with layers inside behaviors.
+                // Throw the towel, discard the frame and let the programmer
+                // choose what will be the next active layer.
+                console.log(gl4.activeLayer);
+                return;
+            }
         }
-    });
+    }
+
+    this.activeLayer = oldActiveLayer;
 };
 
 gl4.processKeyEvent = function (event, value) {
@@ -236,31 +246,6 @@ window.addEventListener('keyup', function (event) {
 window.addEventListener('blur', function (event) {
     console.log('Should have stopped, but there\'s no stop yet.');
 }, false);
-
-(function () {
-    function run() {
-        window.requestAnimationFrame(run);
-        if (gl4.paused) {
-            return;
-        }
-
-        gl4.step();
-        gl4.render();
-
-        var currentLoop = new Date;
-        var timeDif = currentLoop - gl4.lastLoop;
-        gl4.lastLoop = currentLoop;
-        gl4.frameTime += (timeDif - gl4.frameTime) / gl4.FRAME_TIME_FILTER;
-        gl4.fps = (1000 / gl4.frameTime).toFixed(1);
-
-        gl4.seconds += timeDif / 1000;
-
-        if (gl4.debug) {
-            gl4.context.fillText(gl4.fps + ' fps', gl4.canvas.width, 20);
-        }
-    }
-    run();
-}());
 
 
 function Layer() {
@@ -558,8 +543,8 @@ function fillDefault(original, def) {
 
     return obj;
 }
+gl4.layer(new Layer());
 
-gl4.activeLayer = gl4.layers[0];
 gl4.mouse = new Entity(null);
 gl4.mouse.isDown = false;
 gl4.screen = new Entity(null, [],
@@ -573,3 +558,29 @@ for (var name in gl4.KEYCODE_BY_NAME) {
 gl4.context.textAlign = 'right'
 gl4.context.fillStyle = 'green';
 gl4.context.font = 'bold 16px Verdana';
+
+(function () {
+
+    function run() {
+        window.requestAnimationFrame(run);
+        if (gl4.paused) {
+            return;
+        }
+
+        gl4.step();
+        gl4.render();
+
+        var currentLoop = new Date;
+        var timeDif = currentLoop - gl4.lastLoop;
+        gl4.lastLoop = currentLoop;
+        gl4.frameTime += (timeDif - gl4.frameTime) / gl4.FRAME_TIME_FILTER;
+        gl4.fps = (1000 / gl4.frameTime).toFixed(1);
+
+        gl4.seconds += timeDif / 1000;
+
+        if (gl4.debug) {
+            gl4.context.fillText(gl4.fps + ' fps', gl4.canvas.width, 20);
+        }
+    }
+    run();
+}());
