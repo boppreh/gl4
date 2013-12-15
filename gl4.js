@@ -44,16 +44,19 @@ var gl4 = {
 
 gl4.layer = function (layer) {
     layer = layer || new Layer();
-    this.layers.push(layer);
+    if (this.layers.indexOf(layer) === -1) {
+        var currentIndex = this.layers.indexOf(this.activeLayer);
+        this.layers.splice(currentIndex + 1, 0, layer);
+    }
     this.activeLayer = layer;
     return layer;
 };
 
 gl4.unlayer = function (layer) {
     layer = layer || this.activeLayer;
-    var index = layers.indexOf(layer)
-    layers.splice(index, 1);
-    this.activeLayer = layers[index] || layers[index - 1];
+    var index = this.layers.indexOf(layer)
+    this.layers.splice(index, 1);
+    this.activeLayer = this.layers[index - 1] || this.layers[index];
     return layer;
 };
 
@@ -392,14 +395,14 @@ function TextEntity(value/*, rest of Entity params*/) {
     Entity.apply(this, Array.prototype.slice.call(arguments, 0));
 
     this.value = value;
-    this.color = 'green';
-    this.font = '26px bold Verdana';
+    this.color = '';
+    this.font ='';
     this.alignment = 'left';
 
     this.draw = function (context) {
-        context.fillStyle = this.color;
-        context.font = this.font;
-        context.textAlign = this.alignment;
+        context.fillStyle = this.color || context.fillStyle;
+        context.font = this.font || context.font;
+        context.textAlign = this.alignment || context.textAlign;
         context.fillText(this.value, 0, 0);
 
         var measure = context.measureText(this.value);
