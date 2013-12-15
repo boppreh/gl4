@@ -83,7 +83,7 @@ function attract(objectTag, targetTag, constantForce, elasticForce) {
         var difX = target.pos.x - object.pos.x,
             difY = target.pos.y - object.pos.y,
             angle = Math.atan2(difY, difX),
-            distance = Math.sqrt(difX * difX + difY * difY),
+            distance = Math.max(Math.sqrt(difX * difX + difY * difY), 1),
             f = constantForce + 1 / distance * elasticForce;
 
         object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
