@@ -342,6 +342,8 @@ Entity.prototype.render = function (context) {
 
             context.fillText(tag, x, y);
         }
+        context.strokeRect(-this.size.x / 2, -this.size.y / 2,
+                           this.size.x, this.size.y);
     }
 
     context.rotate(-this.pos.angle);
