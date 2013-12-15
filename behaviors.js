@@ -315,3 +315,8 @@ function delay(interval, behavior) {
         matches.push([MATCH_1[0], MATCH_2[0], MATCH_3[0]]);
     });
 }
+
+function once(behavior) {
+    gl4.unregister(behavior);
+    behavior();
+}
