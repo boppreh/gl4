@@ -42,21 +42,36 @@ var gl4 = {
     screen: null,
 };
 
+gl4.layer = function (layer) {
+    layer = layer || new Layer();
+    this.layers.push(layer);
+    this.activeLayer = layer;
+    return layer;
+};
+
+gl4.unlayer = function (layer) {
+    layer = layer || this.activeLayer;
+    var index = layers.indexOf(layer)
+    layers.splice(index, 1);
+    this.activeLayer = layers[index] || layers[index - 1];
+    return layer;
+};
+
 gl4.register = function () {
     return this.activeLayer.register.apply(this.activeLayer, arguments);
-}
+};
 
 gl4.unregister = function () {
     return this.activeLayer.unregister.apply(this.activeLayer, arguments);
-}
+};
 
 gl4.add = function () {
     this.activeLayer.add.apply(this.activeLayer, arguments);
-}
+};
 
 gl4.remove = function () {
     this.activeLayer.remove.apply(this.activeLayer, arguments);
-}
+};
 
 gl4.createImage = function () {
     var params = Array.prototype.slice(arguments, 0);
@@ -64,7 +79,7 @@ gl4.createImage = function () {
     ImageEntity.apply(entity, arguments);
     this.add(entity);
     return entity;
-}
+};
 
 gl4.createText = function () {
     var params = Array.prototype.slice(arguments, 0);
@@ -72,14 +87,14 @@ gl4.createText = function () {
     TextEntity.apply(entity, arguments);
     this.add(entity);
     return entity;
-}
+};
 
 gl4.tagged = function (tag) {
     if (this.tags[tag] === undefined) {
         this.tags[tag] = {};
     }
     return this.tags[tag];
-}
+};
 
 gl4.forEach = function (/*tags, callback*/) {
     var args = Array.prototype.slice.call(arguments, 0),
@@ -116,7 +131,7 @@ gl4.forEach = function (/*tags, callback*/) {
     }
 
     cartesianProduct(tags, []);
-}
+};
 
 gl4.render = function () {
     if (this.MOTION_BLUR_STRENGTH === 0) {
@@ -153,7 +168,7 @@ gl4.step = function () {
             layer.behaviors[i]();
         }
     });
-}
+};
 
 gl4.processKeyEvent = function (event, value) {
     var keycode = event.which,
@@ -173,7 +188,7 @@ gl4.processKeyEvent = function (event, value) {
     if (!hasCtrl && (isKnownSpecial || isAlpha)) {
         event.preventDefault();
     }
-}
+};
 
 window.addEventListener('mousemove', function (event) {
     var canvasBounds = gl4.canvas.getBoundingClientRect();
@@ -304,7 +319,7 @@ Entity.prototype.destroy = function () {
     for (var tag in this.tags) {
         this.untag(tag);
     }
-}
+}:
 
 Entity.prototype.render = function (context) {
     context.translate(this.pos.x, this.pos.y);
@@ -398,7 +413,7 @@ TextEntity.prototype.add = function (amount) {
     return function() {
         text.value += amount;
     }
-}
+};
 
 TextEntity.prototype.subtract = function (amount) {
     var text = this;
@@ -406,7 +421,7 @@ TextEntity.prototype.subtract = function (amount) {
     return function() {
         text.value -= amount;
     }
-}
+};
 
 
 function ImageEntity(imageSource/*, rest of Entity params*/) {
