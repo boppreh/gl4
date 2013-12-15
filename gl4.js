@@ -14,6 +14,26 @@ function Layer() {
     this.objects = {};
     this.behaviors = [];
     this.paused = false;
+    this.behaviorCount = 0;
+}
+
+Layer.prototype.register = function (/*tag1, tag2, tag3, func*/) {
+    var args = Array.prototype.slice.call(arguments, 0),
+        func = args.slice(-1)[0],
+        tags = args.slice(0, -1);
+
+    var behavior = function () {
+        gl4.forEach.apply(gl4.forEach, args);
+    }
+
+    behavior.id = ++this.behaviorCount;
+    this.behaviors[behavior.id] = behavior;
+    behavior.layer = this;
+    return behavior;
+}
+
+Layer.prototype.unregister = function (behavior) {
+    delete this.behaviors[behavior.id];
 }
 
 var gl4 = (function () {
@@ -37,7 +57,6 @@ var gl4 = (function () {
         secondsElapsed = 0,
 
         // Used for generating unique ids for behaviors.
-        behaviorCount = 0,
         objectCount = 0,
         // Number of images still loading.
         nLoading = 0,
@@ -379,47 +398,11 @@ var gl4 = (function () {
          * ...
          */
         forEach: forEach,
-
-        /**
-         * `register(func)` or `register(singleTag, func)`,
-         * `register(tag1, tag2, tag3, func)`
-         *
-         * Register a new behavior. `func` is invoked once for every
-         * tagged combination of items[1], or once every frame if not tags were
-         * used.
-         *
-         * Returns a `behavior` object which can be unregistered or called
-         * manually.
-         *
-         * No more than 2 tags must be used.
-         *
-         * [1]
-         *   register(['bullet', 'ship'], func);
-         *
-         *   func(bullet1, ship1);
-         *   func(bullet2, ship1);
-         *   func(bullet1, ship2);
-         *   ...
-         */
-        register: function (/*tag1, tag2, tag3, func*/) {
-            var args = Array.prototype.slice.call(arguments, 0),
-                func = args.slice(-1)[0],
-                tags = args.slice(0, -1);
-
-            var behavior = function () {
-                forEach.apply(forEach, args);
-            }
-
-            behavior.id = ++behaviorCount;
-            topLayer.behaviors[behavior.id] = behavior;
-            return behavior;
+        register: function() {
+            return topLayer.register.apply(topLayer, arguments);
         },
-
-        /**
-         * Unregisters a previously registered behavior.
-         */
-        unregister: function (behavior) {
-            delete topLayer.behaviors[behavior.id];
+        unregister: function() {
+            return topLayer.unregister.apply(topLayer, arguments);
         },
 
         /**
