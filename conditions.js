@@ -11,13 +11,10 @@ function on(condition, successBehaviors, failureBehaviors) {
         }
 
         for (var i in behaviors) {
-            if (behaviors[i].id === undefined) {
-                // Object is a raw function and must be converted to behavior.
-                behaviors[i] = gl4.register(behaviors[i]);
+            if (behaviors[i].id !== undefined) {
+                // Stop the kernel from calling the behaviors automatically.
+                gl4.unregister(behaviors[i]);
             }
-
-            // Stop the kernel from calling the behaviors automatically.
-            gl4.unregister(behaviors[i]);
         }
 
         return behaviors;

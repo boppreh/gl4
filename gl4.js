@@ -22,11 +22,14 @@ Layer.prototype.register = function (/*tag1, tag2, tag3, func*/) {
         func = args.slice(-1)[0],
         tags = args.slice(0, -1);
 
+    var id = ++this.behaviorCount;
+
     var behavior = function () {
+        func.id = id;
         gl4.forEach.apply(gl4.forEach, args);
     }
 
-    behavior.id = ++this.behaviorCount;
+    behavior.id = id;
     this.behaviors[behavior.id] = behavior;
     behavior.layer = this;
     return behavior;
