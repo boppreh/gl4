@@ -274,9 +274,11 @@ var gl4 = (function () {
         return obj;
     }
 
-    function add(object, tagsList) {
+    function add(object, tagsList, layer) {
+        layer = layer || topLayer;
         object.id = ++objectCount;
-        topLayer.objects[object.id] = object;
+        object.layer = layer;
+        layer.objects[object.id] = object;
 
         if (tagsList) {
             tagsList.forEach(function (tag) {
@@ -287,7 +289,7 @@ var gl4 = (function () {
     }
 
     function remove(object) {
-        delete topLayer.objects[object.id];
+        delete object.layer.objects[object.id];
         for (var tag in object.tags) {
             object.untag(tag);
         }
