@@ -402,6 +402,8 @@ Entity.prototype.step = function () {
 
 function TextEntity(value/*, rest of Entity params*/) {
     Entity.apply(this, Array.prototype.slice.call(arguments, 0));
+    this.inertia.value = this.inertia.value || 0;
+    this.friction.value = this.inertia.value || 0;
 
     this.value = value;
     this.color = '';
@@ -412,6 +414,7 @@ function TextEntity(value/*, rest of Entity params*/) {
     this.minDigits = 0;
     this.minValue = Number.NEGATIVE_INFINITY;
     this.maxValue = Number.POSITIVE_INFINITY;
+    this.decimalPoints = 0;
 
     function pad(value, length) {
         value = value + '';
@@ -422,7 +425,13 @@ function TextEntity(value/*, rest of Entity params*/) {
     }
 
     this.draw = function (context) {
-        var paddedValue = pad(this.value, this.minDigits),
+        var strValue;
+        if (typeof this.value === 'number') {
+            strValue = this.value.toFixed(this.decimalPoints);
+        } else {
+            strValue = this.value;
+        }
+        var paddedValue = pad(strValue, this.minDigits),
             text = this.prefix + paddedValue + this.suffix;
 
         context.fillStyle = this.color || context.fillStyle;
@@ -439,11 +448,27 @@ function TextEntity(value/*, rest of Entity params*/) {
 TextEntity.prototype = Object.create(Entity.prototype);
 TextEntity.prototype.constructor = TextEntity;
 
-TextEntity.prototype.step = function () {
-    if (!isNaN(this.value)) {
-        this.value = Math.min(Math.max(this.value, this.minValue), this.maxValue);
+TextEntity.prototype.move = function (speed) {
+    if (speed.value) {
+        this.value += speed.value;
     }
+    Entity.prototype.move.call(this, speed);
+}
+
+TextEntity.prototype.push = function (acceleration) {
+    if (acceleration.value) {
+        this.inertia.value += acceleration.value;
+    }
+    Entity.prototype.push.call(this, acceleration);
+}
+
+TextEntity.prototype.step = function () {
     Entity.prototype.step.call(this);
+    if (!isNaN(this.value)) {
+        this.value += this.inertia.value;
+        this.value = Math.min(Math.max(this.value, this.minValue), this.maxValue);
+        this.inertia.value *= (1 - this.friction.value);
+    }
 }
 
 TextEntity.prototype.add = function (amount) {
