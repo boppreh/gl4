@@ -13,7 +13,7 @@ if (window.requestAnimationFrame === undefined) {
 function Layer() {
     this.objects = {};
     this.tags = {};
-    this.behaviors = {};
+    this.behaviors = [];
     this.paused = false;
 }
 
@@ -255,6 +255,16 @@ var gl4 = (function () {
                 this.inertia.x += acceleration.x || 0;
                 this.inertia.y += acceleration.y || 0;
                 this.inertia.angle += acceleration.angle || 0;
+            },
+
+            tag: function (tagName) {
+                this.tags[tagName] = tagName;
+                topLayer.tags[tagName][this.id] = this;
+            },
+
+            untag: function (tagName) {
+                delete this.tags[tagName];
+                delete topLayer.tags[tagName][this.id];
             }
         };
         add(obj, tagsList);
@@ -398,7 +408,7 @@ var gl4 = (function () {
             }
 
             behavior.id = behaviorCount++;
-            topLayer.behaviors[behavior.id] = behavior;
+            topLayer.behaviors.push(behavior);
             return behavior;
         },
 
@@ -406,7 +416,7 @@ var gl4 = (function () {
          * Unregisters a previously registered behavior.
          */
         unregister: function (behavior) {
-            delete topLayer.behaviors[behavior.id];
+            topLayer.behaviors.splice(topLayer.behaviors.indexOf(behavior));
         },
 
         /**
