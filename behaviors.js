@@ -316,7 +316,13 @@ function delay(interval, behavior) {
     });
 }
 
-function once(behavior) {
-    gl4.unregister(behavior);
-    behavior();
+function once(behaviors) {
+    if (behaviors.id) {
+        behaviors = [behaviors];
+    }
+
+    for (var i in behaviors) {
+        gl4.unregister(behaviors[i]);
+        behavior[i]();
+    }
 }
