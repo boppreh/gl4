@@ -228,6 +228,7 @@ function applyEffect(tag, effect) {
 }
 
 function glow(object, color, size) {
+    size = size === undefined ? 8 : size;
     return applyEffect(object, function (context) {
         context.shadowColor = color;
         context.shadowOffsetX = 0;
