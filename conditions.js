@@ -171,13 +171,12 @@ function pulse(frequency, source, startAsTrue) {
 
 function up(condition) {
     var pastValues = {};
-    var pastResult = false;
 
     return function() {
         var matches = [];
-        var returned = condition();
+        var pastValuesUsed = {};
 
-        returned.forEach(function (match) {
+        condition().forEach(function (match) {
             var ids = [];
             for (var i in match) {
                 ids.push(match[i].id);
