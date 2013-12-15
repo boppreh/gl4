@@ -414,8 +414,9 @@ function ImageEntity(imageSource/*, rest of Entity params*/) {
     if (ImageEntity.cache[imageSource] === undefined) {
         var image = new Image();
         image.src = imageSource;
+        var self = this;
         image.addEventListener('load', function () {
-            this.size = {x: image.width, y: image.height};
+            self.size = {x: image.width, y: image.height};
         });
 
         ImageEntity.cache[imageSource] = image;
@@ -426,7 +427,7 @@ function ImageEntity(imageSource/*, rest of Entity params*/) {
     this.draw = function (context) {
         if (this.image.width !== 0) {
             context.drawImage(this.image,
-                              -this.size.x / 2, -this.size.y / 2);
+                              -this.image.width / 2, -this.image.height / 2);
         }
     }
 }
