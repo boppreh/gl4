@@ -60,6 +60,10 @@ gl4.unlayer = function (layer) {
     return layer;
 };
 
+gl4.unlayerAll = function () {
+    this.layers.splice(1, this.layers.indexOf(this.activeLayer));
+}
+
 gl4.register = function () {
     return this.activeLayer.register.apply(this.activeLayer, arguments);
 };
