@@ -284,7 +284,7 @@ function Entity(draw, tags, pos, size, inertia, friction) {
     this.inertia = fillDefault(inertia, {x: 0, y: 0, angle: 0});
     this.friction = fillDefault(friction, {x: 0.8, y: 0.8, angle: 0.8});
 
-    this.effects = [];
+    this.effects = {};
     this.tags = {};
 
 
@@ -322,9 +322,10 @@ Entity.prototype.render = function (context) {
     }
 
     context.rotate(-this.pos.angle);
-    this.effects.forEach(function (effect) {
-        effect(context);
-    });
+    for (var effectName in this.effects) {
+        this.effects[effectName](context);
+        delete this.effects[effectName];
+    }
 
     this.draw(context);
 };

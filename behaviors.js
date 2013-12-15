@@ -214,46 +214,45 @@ function destroy(tag) {
     });
 }
 
-function applyEffect(tag, effect) {
-    var previousTagged = [];
-    gl4.register(function () {
-        previousTagged.forEach(function (object) {
-            object.effects.splice(object.effects.indexOf(effect), 1);
-        });
-    });
-    return gl4.register(tag, function (object) {
-        previousTagged.push(object);
-        object.effects.push(effect);
-    });
-}
-
 function glow(object, color, size) {
     size = size === undefined ? 8 : size;
-    return applyEffect(object, function (context) {
+    color = color === undefined ? 'white' : color;
+    function effect(context) {
         context.shadowColor = color;
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
         context.shadowBlur = size;
+    }
+    return gl4.register(object, function (object) {
+        object.effects['shadow'] = effect;
     });
 }
 
-function shadow(object, offsetX, offsetY, blur, color) {
+function shadow(object, offset, blur, color) {
     color = color === undefined ? 'black' : color;
     blur = blur === undefined ? 3 : blur;
-    offsetX = offsetX === undefined ? 1 : offsetX;
-    offsetY = offsetY === undefined ? 1 : offsetY;
+    offset = fillDefault(offset, {x: 2, y: 2});
 
-    return applyEffect(object, function (context) {
+    function effect(context) {
         context.shadowColor = color;
-        context.shadowOffsetX = offsetX;
-        context.shadowOffsetY = offsetY;
+        context.shadowOffsetX = offset.x;
+        context.shadowOffsetY = offset.y;
         context.shadowBlur = blur;
+    }
+
+    return gl4.register(object, function (object) {
+        object.effects['shadow'] = effect;
     });
 }
 
 function alpha(object, amount) {
     amount = amount === undefined ? 0.5 : amount;
-    return applyEffect(object, function (context) {
+
+    function effect(context) {
        context.globalAlpha -= 1 - amount;
-   });
+    }
+
+    return gl4.register(object, function (object) {
+        object.effects['alpha'] = effect;
+    });
 }
