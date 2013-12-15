@@ -189,15 +189,13 @@ function slowDown(tag, slowness) {
 
 function tag(targets, tag) {
     return gl4.register(targets, function (target) {
-        target.tags[tag] = tag;
-        gl4.tagged(tag)[target.id] = target;
+        target.tag(tag);
     });
 }
 
 function untag(targets, tag) {
     return gl4.register(targets, function (target) {
-        delete target.tags[tag];
-        delete gl4.tagged(tag)[target.id];
+        target.untag(tag);
     });
 }
 
@@ -257,4 +255,25 @@ function alpha(object, amount) {
     return applyEffect(object, function (context) {
        context.globalAlpha -= 1 - amount;
    });
+}
+ 
+function conditionalTag(objects, condition, trueTag, falseTag) {
+    trueTag = trueTag || '';
+    falseTag = falseTag || '';
+
+    return gl4.register(objects, function (object) {
+        var calledCallback = false;
+
+        var returned = condition(function () {
+            calledCallback = true;
+        });
+
+        if (calledCallback || returned) {
+            object.tag(trueTag);
+            object.untag(falseTag);
+        } else {
+            object.untag(trueTag);
+            object.tag(falseTag);
+        }
+    });
 }
