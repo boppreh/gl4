@@ -446,7 +446,7 @@ var gl4 = (function () {
                 context.drawImage(this.img, -this.size.x / 2, -this.size.y / 2);
             };
 
-            if (obj.img.complete || obj.img.width !== 0) {
+            if (obj.img.width != 0) {
                 obj.size = {x: obj.img.width, y: obj.img.height}
             } else {
                 obj.img.addEventListener('load', function () {
