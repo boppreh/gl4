@@ -71,7 +71,7 @@ function mouseUp() {
 
 function keyDown(key) {
     return function() {
-        if (gl4.isPressed(key)) {
+        if (gl4.pressedKeys[key]) {
             return [[]];
         } else {
             return [];
@@ -137,7 +137,7 @@ function pulse(frequency, source, startAsTrue) {
         var matches = [];
         gl4.forEach(source, function (object) {
             var nextPulseTime = nextPulseTimeBySource[object.id],
-                time = gl4.seconds();
+                time = gl4.seconds;
 
             if (!nextPulseTime) {
                 nextPulseTime = time + initialTimeAdded

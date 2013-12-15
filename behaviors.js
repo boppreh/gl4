@@ -96,7 +96,7 @@ function attract(objectTag, targetTag, constantForce, elasticForce) {
 function create(img, tags, pos, inertia, friction) {
     return gl4.register(function () {
         var tagsCopy = tags.slice();
-        gl4.createImg(img, tagsCopy, pos, inertia, friction);
+        gl4.createImage(img, tagsCopy, pos, inertia, friction);
     });
 }
 
@@ -210,7 +210,7 @@ function sound(src) {
 
 function destroy(tag) {
     return gl4.register(tag, function (object) {
-        gl4.remove(object);
+        object.destroy();
     });
 }
 
