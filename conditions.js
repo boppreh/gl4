@@ -43,7 +43,7 @@ function on(condition, successBehaviors, failureBehaviors) {
 }
 
 function mouseDown(objectTag) {
-    objectTag = objectTag || 'screen';
+    objectTag = objectTag || gl4.screen;
     return function () {
         if (!gl4.mouse.isDown) {
             return [];
