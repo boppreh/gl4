@@ -319,7 +319,7 @@ Entity.prototype.destroy = function () {
     for (var tag in this.tags) {
         this.untag(tag);
     }
-}:
+};
 
 Entity.prototype.render = function (context) {
     context.translate(this.pos.x, this.pos.y);
@@ -401,6 +401,10 @@ function TextEntity(value/*, rest of Entity params*/) {
         context.font = this.font;
         context.textAlign = this.alignment;
         context.fillText(this.value, 0, 0);
+
+        var measure = context.measureText(this.value);
+        this.size.x = measure.width;
+        this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
     }
 }
 
