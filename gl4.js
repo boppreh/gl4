@@ -52,7 +52,9 @@ var gl4 = (function () {
         lastLoop = new Date,
         fps = 0,
         
-        frameRequestId = 0;
+        frameRequestId = 0,
+        
+        imgCache = {};
 
     var mouse = createEmptyObject(['mouse'],
                                   {x: 0, y: 0, angle: 0},
@@ -421,25 +423,36 @@ var gl4 = (function () {
         /**
          * Manually creates a new image object.
          *
-         * `imageSource` is a URL pointing to an image.
+         * `imgSource` is a URL pointing to an image.
          * `objTags` is an array of the tags the object will have.
          * `pos` is a {x, y, angle} dict of the desired initial position.
          * `inertia` is a {x, y, angle} dict of the desired initial inertia.
          * `friction` is a {x, y, angle} dict of the desired initial friction.
          */
-        createImg: function (imageSource, objTags, pos, inertia, friction) {
+        createImg: function (imgSource, objTags, pos, inertia, friction) {
             var obj = createEmptyObject(objTags, pos, inertia, friction);
-            obj.img = new Image();
+
+            if (imgCache[imgSource] === undefined) {
+                var img = new Image();
+                imgCache[imgSource] = img;
+                img.src = imgSource;
+                nLoading++;
+                img.addEventListener('load', function () {
+                    nLoading--;
+                });
+            }
+            obj.img = imgCache[imgSource];
             obj.drawIn = function (context) {
                 context.drawImage(this.img, -this.size.x / 2, -this.size.y / 2);
             };
 
-            nLoading++;
-            obj.img.onload = function () {
-                nLoading--;
+            if (obj.img.complete || obj.img.width !== 0) {
                 obj.size = {x: obj.img.width, y: obj.img.height}
-            };
-            obj.img.src = imageSource;
+            } else {
+                obj.img.addEventListener('load', function () {
+                    obj.size = {x: obj.img.width, y: obj.img.height}
+                });
+            }
 
             // Warning! Object has not been completely loaded yet.
             return obj;
