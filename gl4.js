@@ -419,14 +419,30 @@ function TextEntity(value/*, rest of Entity params*/) {
     this.color = '';
     this.font ='';
     this.alignment = 'center';
+    this.prefix = '';
+    this.suffix = '';
+    this.minDigits = 0;
+    this.minValue = Number.NEGATIVE_INFINITY;
+    this.maxValue = Number.POSITIVE_INFINITY;
+
+    function pad(value, length) {
+        value = value + '';
+        if (value.length >= length) {
+            return value;
+        }
+        return new Array(length - value.length + 1).join('0') + value;
+    }
 
     this.draw = function (context) {
+        var paddedValue = pad(this.value, this.minDigits),
+            text = this.prefix + paddedValue + this.suffix;
+
         context.fillStyle = this.color || context.fillStyle;
         context.font = this.font || context.font;
         context.textAlign = this.alignment || context.textAlign;
-        context.fillText(this.value, 0, this.size.y / 2);
+        context.fillText(text, 0, this.size.y / 2);
 
-        var measure = context.measureText(this.value);
+        var measure = context.measureText(text);
         this.size.x = measure.width;
         this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
     }
@@ -434,6 +450,13 @@ function TextEntity(value/*, rest of Entity params*/) {
 
 TextEntity.prototype = Object.create(Entity.prototype);
 TextEntity.prototype.constructor = TextEntity;
+
+TextEntity.prototype.step = function () {
+    if (!isNaN(this.value)) {
+        this.value = Math.min(Math.max(this.value, this.minValue), this.maxValue);
+    }
+    Entity.prototype.step.call(this);
+}
 
 TextEntity.prototype.add = function (amount) {
     var text = this;
