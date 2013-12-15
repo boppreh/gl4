@@ -186,7 +186,6 @@ gl4.step = function () {
                 // Someone is messing with layers inside behaviors.
                 // Throw the towel, discard the frame and let the programmer
                 // choose what will be the next active layer.
-                console.log(gl4.activeLayer);
                 return;
             }
         }
