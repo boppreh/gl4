@@ -84,7 +84,7 @@ var gl4 = (function () {
 
         if (debug) {
             context.fillText(fps + ' fps', canvas.width, 20);
-            context.fillText(Object.keys(objects).length + ' objects', canvas.width, 36);
+            context.fillText(Object.keys(topLayer.objects).length + ' objects', canvas.width, 36);
         }
     }
 
@@ -287,8 +287,7 @@ var gl4 = (function () {
     function remove(object) {
         delete topLayer.objects[object.id];
         for (var tag in object.tags) {
-            delete tagged(tag)[object.id];
-            delete object.tags[tag];
+            object.untag(tag);
         }
     }
 
@@ -464,6 +463,10 @@ var gl4 = (function () {
             };
 
             return obj;
+        },
+
+        debug: function () {
+            debug = true;
         },
     };
 }());
