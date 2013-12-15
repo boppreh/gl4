@@ -406,8 +406,8 @@ var gl4 = (function () {
                 forEach.apply(forEach, args);
             }
 
-            behavior.id = behaviorCount++;
-            topLayer.behaviors.push(behavior);
+            behavior.id = ++behaviorCount;
+            topLayer.behaviors[behavior.id] = behavior;
             return behavior;
         },
 
@@ -415,7 +415,7 @@ var gl4 = (function () {
          * Unregisters a previously registered behavior.
          */
         unregister: function (behavior) {
-            topLayer.behaviors.splice(topLayer.behaviors.indexOf(behavior));
+            delete topLayer.behaviors[behavior.id];
         },
 
         /**
