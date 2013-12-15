@@ -69,6 +69,39 @@ function mouseUp() {
     };
 }
 
+function click(target) {
+    var clicked = {};
+    var tagged;
+    if (typeof target === 'string') {
+        tagged = gl4.tagged(target);
+    } else if (target.id !== undefined) {
+        tagged = [target];
+    } else {
+        tagged = target;
+    }
+
+    window.addEventListener('mousedown', function (event) {
+        for (var i in tagged) {
+            var object = tagged[i];
+            if (object.hitTest(gl4.mouse)) {
+                clicked[object.id] = object;
+            }
+        }
+    });
+
+    window.addEventListener('mouseup', function (event) {
+        clicked = {};
+    });
+
+    return function () {
+        var matches = [];
+        for (var id in clicked) {
+            matches.push([clicked[id]]);
+        }
+        return matches;
+    }
+}
+
 function keyDown(key) {
     return function() {
         if (gl4.pressedKeys[key]) {
