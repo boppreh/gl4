@@ -1,72 +1,96 @@
-var MATCH_1 = [];
-var MATCH_2 = [];
+var MATCH_1 = [null];
+var MATCH_2 = [null];
 var MATCH_3 = [];
 
-function on(condition/*, ...behaviors*/) {
-    var behaviors = Array.prototype.slice.call(arguments, 1);
-    for (var i in behaviors) {
-        if (behaviors[i].id === undefined) {
-            // Object is a raw function and must be converted to behavior.
-            behaviors[i] = gl4.register(behaviors[i]);
+function on(condition, successBehaviors, failureBehaviors) {
+    function parseBehaviors(behaviors) {
+        if (behaviors === undefined) {
+            return [];
+        } else if (typeof behaviors === 'function') {
+            return parseBehaviors([behaviors]);
         }
-
-        // Stop the kernel from calling the behaviors automatically.
-        gl4.unregister(behaviors[i]);
-    }
-
-    function runBehaviors(match1, match2, match3) {
-        MATCH_1[0] = match1;
-        MATCH_2[0] = match2;
-        MATCH_3[0] = match3;
 
         for (var i in behaviors) {
-            behaviors[i]();
+            if (behaviors[i].id === undefined) {
+                // Object is a raw function and must be converted to behavior.
+                behaviors[i] = gl4.register(behaviors[i]);
+            }
+
+            // Stop the kernel from calling the behaviors automatically.
+            gl4.unregister(behaviors[i]);
         }
+
+        return behaviors;
     }
+    successBehaviors = parseBehaviors(successBehaviors);
+    failureBehaviors = parseBehaviors(failureBehaviors);
 
     return gl4.register(function () {
-        var result = condition(runBehaviors);
-        // Allow conditions to return true instead of using the callback.
-        if (result === true) {
-            runBehaviors();
+        var result = condition();
+        if (result.length) {
+            result.forEach(function (match) {
+                MATCH_1[0] = match[0];
+                MATCH_2[0] = match[1];
+                MATCH_3[0] = match[2];
+
+                for (var i in successBehaviors) {
+                    successBehaviors[i]();
+                }
+            });
+        } else {
+            for (var i in failureBehaviors) {
+                failureBehaviors[i]();
+            }
         }
     });
 }
 
 function mouseDown(objectTag) {
     objectTag = objectTag || 'screen';
-    return function (callback) {
+    return function () {
         if (!gl4.mouse.isDown) {
-            return;
+            return [];
         }
 
+        var matches = [];
         gl4.forEach(objectTag, function (object) {
             if (object.hitTest(gl4.mouse)) {
-                callback(object);
+                matches.push([object]);
             }
         });
+        return matches;
     };
 }
 
 function mouseUp() {
     return function () {
-        return !gl4.mouse.isDown;
+        if (gl4.mouse.isDown) {
+            return [[]];
+        } else {
+            return [];
+        }
     };
 }
 
 function keyDown(key) {
     return function() {
-        return gl4.isPressed(key);
+        if (gl4.isPressed(key)) {
+            return [[]];
+        } else {
+            return [];
+        }
     };
 }
 
 function hit(objectTag, targetTag) {
-    return function(callback) {
+    return function() {
+        var matches = [];
         gl4.forEach(objectTag, targetTag, function(object, target) {
             if (object.hitTest(target)) {
-                callback(object, target);
+                matches.push([object, target]);
             }
         });
+        return matches;
     };
 }
 
@@ -86,18 +110,20 @@ function distance(objectTag, targetTag, maxDistance) {
 
 function not(condition) {
     return function () {
-        return !condition.apply(condition, arguments);
+        return condition().length === 0;
     }
 }
 
 function or(/*conditions*/) {
     var conditions = Array.prototype.slice.call(arguments, 0);
-    return function (callback) {
-        var result = false;
+    return function () {
+        var matches = [];
         conditions.forEach(function (condition) {
-            result = condition(callback) || result;
+            condition().forEach(function (match) {
+                matches.push(match);
+            });
         });
-        return result;
+        return matches;
     }
 }
 
@@ -110,7 +136,8 @@ function pulse(frequency, source, startAsTrue) {
         initialTimeAdded = startAsTrue ? 0 : interval,
         nextPulseTimeBySource = {};
 
-    return function (callback) {
+    return function () {
+        var matches = [];
         gl4.forEach(source, function (object) {
             var nextPulseTime = nextPulseTimeBySource[object.id],
                 time = gl4.seconds();
@@ -122,9 +149,10 @@ function pulse(frequency, source, startAsTrue) {
 
             if (nextPulseTime <= time) {
                 nextPulseTimeBySource[object.id] = time + interval;
-                callback(object);
+                matches.push([object]);
             }
         });
+        return matches;
     }
 }
 
@@ -132,32 +160,29 @@ function up(condition) {
     var pastValues = {};
     var pastResult = false;
 
-    return function(callback) {
-        var pastValuesUsed = {};
+    return function() {
+        var matches = [];
+        var returned = condition();
 
-        var fakeCallback = function () {
+        returned.forEach(function (match) {
             var ids = [];
-            for (var i in arguments) {
-                ids.push(arguments[i].id);
+            for (var i in match) {
+                ids.push(match[i].id);
             }
             var key = String(ids);
             if (!pastValues[key]) {
-                callback.apply(callback, arguments);
+                matches.push(match);
             }
             pastValues[key] = true;
             pastValuesUsed[key] = true;
-        }
-
-        var result = condition(fakeCallback);
-        if (result === true && pastResult === false) {
-            callback();
-        }
-        pastResult = result;
+        });
 
         for (var key in pastValues) {
             if (pastValuesUsed[key] === undefined) {
                 pastValues[key] = false;
             }
         }
+
+        return matches;
     }
 }

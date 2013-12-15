@@ -257,24 +257,3 @@ function alpha(object, amount) {
        context.globalAlpha -= 1 - amount;
    });
 }
- 
-function conditionalTag(condition, objects, trueTag, falseTag) {
-    trueTag = trueTag || '';
-    falseTag = falseTag || '';
-
-    return gl4.register(objects, function (object) {
-        var calledCallback = false;
-
-        var returned = condition(function () {
-            calledCallback = true;
-        });
-
-        if (calledCallback || returned) {
-            object.tag(trueTag);
-            object.untag(falseTag);
-        } else {
-            object.untag(trueTag);
-            object.tag(falseTag);
-        }
-    });
-}
