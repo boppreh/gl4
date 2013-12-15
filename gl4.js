@@ -283,6 +283,9 @@ Layer.prototype.unregister = function (behavior) {
 };
 
 Layer.prototype.add = function (entity) {
+    if (entity.layer) {
+        entity.layer.remove(entity);
+    }
     entity.layer = this;
     this.entities[entity.id] = entity;
 };
