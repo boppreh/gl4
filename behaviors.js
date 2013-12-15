@@ -285,3 +285,33 @@ function alpha(object, amount) {
         object.effects['alpha'] = effect;
     });
 }
+
+function delay(interval, behavior) {
+    interval = interval || 1;
+    if (behavior.id !== undefined) {
+        gl4.unregister(behavior);
+    }
+
+    var nextTimes = [];
+    var matches = [];
+
+    gl4.register(function () {
+        while (nextTimes.length && nextTimes[0] <= gl4.seconds) {
+            nextTimes.shift();
+            var match = matches.shift();
+            var backup = [MATCH_1[0], MATCH_2[0], MATCH_3[0]];
+            MATCH_1[0] = match[0];
+            MATCH_2[0] = match[1];
+            MATCH_3[0] = match[2];
+            behavior();
+            MATCH_1[0] = backup[0];
+            MATCH_2[0] = backup[1];
+            MATCH_3[0] = backup[2];
+        }
+    });
+
+    return gl4.register(function () {
+        nextTimes.push(gl4.seconds + interval);
+        matches.push([MATCH_1[0], MATCH_2[0], MATCH_3[0]]);
+    });
+}
