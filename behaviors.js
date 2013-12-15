@@ -214,6 +214,22 @@ function destroy(tag) {
     });
 }
 
+function fadeOut(tag, speed) {
+    speed = speed === undefined ? 0.05 : speed;
+
+    return gl4.register(tag, function (object) {
+        var alpha = object.alpha || 1.0;
+        object.alpha = alpha -= speed;
+        if (object.alpha <= 0) {
+            object.destroy();
+        } else {
+            object.effects['alpha'] = function (context) {
+                context.globalAlpha = object.alpha;
+            }
+        }
+    });
+}
+
 function glow(object, color, size) {
     size = size === undefined ? 8 : size;
     color = color === undefined ? 'white' : color;
