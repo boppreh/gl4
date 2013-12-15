@@ -136,16 +136,12 @@ function pulse(frequency, source, startAsTrue) {
     return function () {
         var matches = [];
         gl4.forEach(source, function (object) {
-            var nextPulseTime = nextPulseTimeBySource[object.id],
-                time = gl4.seconds;
-
-            if (!nextPulseTime) {
-                nextPulseTime = time + initialTimeAdded
-                nextPulseTimeBySource[object.id] = nextPulseTime;
+            if (!nextPulseTimeBySource[object.id]) {
+                nextPulseTimeBySource[object.id] = gl4.seconds + initialTimeAdded;
             }
 
-            if (nextPulseTime <= time) {
-                nextPulseTimeBySource[object.id] = time + interval;
+            while (nextPulseTimeBySource[object.id] <= gl4.seconds) {
+                nextPulseTimeBySource[object.id] += interval;
                 matches.push([object]);
             }
         });
