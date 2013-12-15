@@ -91,6 +91,24 @@ function hit(objectTag, targetTag) {
     };
 }
 
+function circleHit(objectTag, targetTag) {
+    return function() {
+        var matches = [];
+        gl4.forEach(objectTag, targetTag, function(object, target) {
+            var difX = target.pos.x - object.pos.x,
+                difY = target.pos.y - object.pos.y,
+                distance = Math.sqrt(difX * difX + difY * difY),
+                radiusA = (object.size.x + object.size.y) / 4,
+                radiusB = (target.size.x + target.size.y) / 4;
+
+            if (distance <= radiusA + radiusB) {
+                matches.push([object, target]);
+            }
+        });
+        return matches;
+    };
+}
+
 function distance(objectTag, targetTag, maxDistance) {
     return function() {
         var matches = [];
