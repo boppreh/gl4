@@ -447,18 +447,31 @@ TextEntity.prototype.step = function () {
 }
 
 TextEntity.prototype.add = function (amount) {
-    var text = this;
+    var self = this;
     amount = amount === undefined ? 1 : amount;
     return function() {
-        text.value += amount;
+        self.value += amount;
     }
 };
 
 TextEntity.prototype.subtract = function (amount) {
-    var text = this;
+    var self = this;
     amount = amount === undefined ? 1 : amount;
     return function() {
-        text.value -= amount;
+        self.value -= amount;
+    }
+};
+
+TextEntity.prototype.at = function (min, max) {
+    min = min || 0;
+    max = max === undefined ? min : max;
+
+    var self = this;
+    return function() {
+        if (self.value >= min && self.value <= max) {
+            return [[self]];
+        }
+        return [];
     }
 };
 
