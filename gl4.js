@@ -12,7 +12,6 @@ if (window.requestAnimationFrame === undefined) {
 
 function Layer() {
     this.objects = {};
-    this.tags = {};
     this.behaviors = [];
     this.paused = false;
 }
@@ -30,6 +29,7 @@ var gl4 = (function () {
 
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
+        tags = {},
         layers = [new Layer()],
         topLayer = layers[0],
 
@@ -170,10 +170,10 @@ var gl4 = (function () {
     }
 
     function tagged(tag) {
-        if (topLayer.tags[tag] == undefined) {
-            topLayer.tags[tag] = {};
+        if (tags[tag] == undefined) {
+            tags[tag] = {};
         }
-        return topLayer.tags[tag];
+        return tags[tag];
     }
 
     function forEach(/*tags, callback*/) {
