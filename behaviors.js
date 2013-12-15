@@ -258,7 +258,7 @@ function alpha(object, amount) {
    });
 }
  
-function conditionalTag(objects, condition, trueTag, falseTag) {
+function conditionalTag(condition, objects, trueTag, falseTag) {
     trueTag = trueTag || '';
     falseTag = falseTag || '';
 
