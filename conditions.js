@@ -92,16 +92,18 @@ function hit(objectTag, targetTag) {
 }
 
 function distance(objectTag, targetTag, maxDistance) {
-    return function(callback) {
+    return function() {
+        var matches = [];
         gl4.forEach(objectTag, targetTag, function(object, target) {
             var difX = target.pos.x - object.pos.x,
                 difY = target.pos.y - object.pos.y,
                 distance = Math.sqrt(difX * difX + difY * difY);
 
             if (distance > maxDistance) {
-                callback(object, target);
+                matches.push([object, target]);
             }
         });
+        return matches
     };
 }
 
