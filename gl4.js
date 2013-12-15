@@ -404,13 +404,13 @@ function TextEntity(value/*, rest of Entity params*/) {
     this.value = value;
     this.color = '';
     this.font ='';
-    this.alignment = 'left';
+    this.alignment = 'center';
 
     this.draw = function (context) {
         context.fillStyle = this.color || context.fillStyle;
         context.font = this.font || context.font;
         context.textAlign = this.alignment || context.textAlign;
-        context.fillText(this.value, 0, 0);
+        context.fillText(this.value, 0, this.size.y / 2);
 
         var measure = context.measureText(this.value);
         this.size.x = measure.width;
