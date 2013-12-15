@@ -94,9 +94,10 @@ function attract(objectTag, targetTag, constantForce, elasticForce) {
  * Creates a new object every time the behavior is run.
  */
 function create(img, tags, pos, inertia, friction) {
+    var layer = gl4.activeLayer;
     return gl4.register(function () {
         var tagsCopy = tags.slice();
-        gl4.createImage(img, tagsCopy, pos, inertia, friction);
+        layer.add(gl4.createImage(img, tagsCopy, pos, inertia, friction));
     });
 }
 
