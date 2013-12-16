@@ -180,6 +180,11 @@ function or(/*conditions*/) {
 }
 
 function pulse(frequency, source, startAsTrue) {
+    if (frequency === 0) {
+        return function () {
+            return [];
+        }
+    }
     frequency = frequency || 1;
     source = source === undefined ? [gl4.mouse] : source;
     startAsTrue = startAsTrue === undefined ? true : startAsTrue;
