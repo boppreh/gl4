@@ -51,7 +51,7 @@ gl4.schedule = function (delay, func) {
         func();
         return;
     }
-    this.futureFunctions.push([this.seconds + delay, func]);
+    this.futureFunctions.push([this.seconds + delay, func, this.activeLayer]);
 }
 
 gl4.layer = function (layer) {
@@ -183,9 +183,11 @@ gl4.step = function () {
 
     for (var i = this.futureFunctions.length - 1; i >= 0; i--) {
         var time = this.futureFunctions[i][0],
-            func = this.futureFunctions[i][1];
+            func = this.futureFunctions[i][1],
+            layer = this.futureFunctions[i][2];
 
         if (time <= this.seconds) {
+            this.activeLayer = layer;
             this.futureFunctions.splice(i, 1);
             func();
         }
@@ -289,7 +291,6 @@ Layer.prototype.register = function (/*tag1, tag2, tag3, func*/) {
     var id = ++this.behaviorCount;
 
     var behavior = function () {
-        func.id = id;
         gl4.forEach.apply(gl4.forEach, args);
     }
 
