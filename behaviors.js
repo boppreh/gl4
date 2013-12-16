@@ -296,7 +296,7 @@ function delay(interval, behavior) {
     var matches = [];
 
     gl4.register(function () {
-        while (nextTimes.length && nextTimes[0] <= gl4.seconds) {
+        if (nextTimes.length && nextTimes[0] <= gl4.seconds) {
             nextTimes.shift();
             var match = matches.shift();
             var backup = [MATCH_1[0], MATCH_2[0], MATCH_3[0]];
@@ -323,6 +323,6 @@ function once(behaviors) {
 
     for (var i in behaviors) {
         gl4.unregister(behaviors[i]);
-        behavior[i]();
+        behaviors[i]();
     }
 }
