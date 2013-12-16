@@ -517,6 +517,9 @@ TextEntity.prototype.at = function (min, max) {
 
 function ImageEntity(imageSource/*, rest of Entity params*/) {
     Entity.apply(this, Array.prototype.slice.call(arguments, 0));
+    if (!imageSource) {
+        return;
+    }
 
     if (ImageEntity.cache[imageSource] === undefined) {
         var image = new Image();
