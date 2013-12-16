@@ -39,7 +39,16 @@ var gl4 = {
 
     mouse: null,
     screen: null,
+
+    futureFunctions: [],
 };
+
+gl4.schedule = function (delay, func) {
+    if (func.id !== undefined) {
+        this.unregister(fun);
+    }
+    this.futureFunctions.push([this.seconds + delay, func]);
+}
 
 gl4.layer = function (layer) {
     layer = layer || new Layer();
@@ -167,6 +176,11 @@ gl4.render = function () {
 
 gl4.step = function () {
     var oldActiveLayer = this.activeLayer;
+
+    while (this.futureFunctions.length &&
+           this.futureFunctions[0][0] <= this.seconds) {
+        this.futureFunctions.shift()[1]();
+    }
 
     for (var i in this.layers) {
         var layer = this.layers[i];
@@ -426,7 +440,7 @@ function TextEntity(value/*, rest of Entity params*/) {
 
     this.draw = function (context) {
         var strValue;
-        if (typeof this.value === 'number') {
+        if (typeof this.value === 'number' && this.decimalPoints) {
             strValue = this.value.toFixed(this.decimalPoints);
         } else {
             strValue = this.value;
@@ -434,14 +448,14 @@ function TextEntity(value/*, rest of Entity params*/) {
         var paddedValue = pad(strValue, this.minDigits),
             text = this.prefix + paddedValue + this.suffix;
 
+        var measure = context.measureText(text);
+        this.size.x = measure.width;
+        this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
+
         context.fillStyle = this.color || context.fillStyle;
         context.font = this.font || context.font;
         context.textAlign = this.alignment || context.textAlign;
         context.fillText(text, 0, this.size.y / 2);
-
-        var measure = context.measureText(text);
-        this.size.x = measure.width;
-        this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
     }
 }
 
