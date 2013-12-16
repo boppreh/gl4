@@ -440,7 +440,7 @@ function TextEntity(value/*, rest of Entity params*/) {
 
     this.draw = function (context) {
         var strValue;
-        if (typeof this.value === 'number' && this.decimalPoints) {
+        if (typeof this.value === 'number') {
             strValue = this.value.toFixed(this.decimalPoints);
         } else {
             strValue = this.value;
