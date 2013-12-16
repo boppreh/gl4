@@ -177,9 +177,14 @@ gl4.render = function () {
 gl4.step = function () {
     var oldActiveLayer = this.activeLayer;
 
-    while (this.futureFunctions.length &&
-           this.futureFunctions[0][0] <= this.seconds) {
-        this.futureFunctions.shift()[1]();
+    for (var i = this.futureFunctions.length - 1; i >= 0; i--) {
+        var time = this.futureFunctions[i][0],
+            func = this.futureFunctions[i][1];
+
+        if (time <= this.seconds) {
+            func();
+            this.futureFunctions.splice(i, 1);
+        }
     }
 
     for (var i in this.layers) {
