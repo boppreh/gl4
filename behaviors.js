@@ -220,7 +220,6 @@ function fadeOut(tag, speed) {
     return gl4.register(tag, function (object) {
         object.alpha -= speed;
         if (object.alpha <= 0) {
-            object.alpha = 0;
             object.destroy();
         }
     });
@@ -230,7 +229,7 @@ function fadeIn(tag, speed) {
     speed = speed === undefined ? 0.05 : speed;
 
     return gl4.register(tag, function (object) {
-        object.alpha = Math.min(1.0, object.alpha + speed);
+        object.alpha += speed;
     });
 }
 

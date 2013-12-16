@@ -422,6 +422,7 @@ Entity.prototype.step = function () {
     this.inertia.x *= (1 - this.friction.x);
     this.inertia.y *= (1 - this.friction.y);
     this.inertia.angle *= (1 - this.friction.angle);
+    this.alpha = Math.min(Math.max(this.alpha, 0.0), 1.0);
 };
 
 
