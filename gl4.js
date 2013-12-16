@@ -459,13 +459,13 @@ function TextEntity(value/*, rest of Entity params*/) {
         var paddedValue = pad(strValue, this.minDigits),
             text = this.prefix + paddedValue + this.suffix;
 
-        var measure = context.measureText(text);
-        this.size.x = measure.width;
-        this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
-
         context.fillStyle = this.color || context.fillStyle;
         context.font = this.font || context.font;
         context.textAlign = this.alignment || context.textAlign;
+
+        var measure = context.measureText(text);
+        this.size.x = measure.width;
+        this.size.y = +this.font.slice(0, this.font.indexOf(' ') - 2);
         context.fillText(text, 0, this.size.y / 2);
     }
 }
