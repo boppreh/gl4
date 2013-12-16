@@ -185,7 +185,7 @@ gl4.step = function () {
     for (var i in this.layers) {
         var layer = this.layers[i];
         if (layer.paused) {
-            return;
+            continue;
         }
 
         gl4.activeLayer = layer;
