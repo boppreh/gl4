@@ -179,12 +179,7 @@ gl4.step = function () {
 
     while (this.futureFunctions.length &&
            this.futureFunctions[0][0] <= this.seconds) {
-        var func =  this.futureFunctions.shift()[1];
-        if (func.id === undefined) {
-            func();
-        } else {
-            gl4.register(func);
-        }
+        this.futureFunctions.shift()[1]();
     }
 
     for (var i in this.layers) {
@@ -626,9 +621,6 @@ gl4.context.font = 'bold 16px Verdana';
             return;
         }
 
-        gl4.step();
-        gl4.render();
-
         var currentLoop = new Date;
         var timeDif = currentLoop - gl4.lastLoop;
         gl4.lastLoop = currentLoop;
@@ -636,6 +628,9 @@ gl4.context.font = 'bold 16px Verdana';
         gl4.fps = (1000 / gl4.frameTime).toFixed(1);
 
         gl4.seconds += timeDif / 1000;
+
+        gl4.step();
+        gl4.render();
 
         if (gl4.debug) {
             gl4.context.fillText(gl4.fps + ' fps', gl4.canvas.width, 20);
