@@ -181,18 +181,6 @@ gl4.render = function () {
 gl4.step = function () {
     var oldActiveLayer = this.activeLayer;
 
-    for (var i = this.futureFunctions.length - 1; i >= 0; i--) {
-        var time = this.futureFunctions[i][0],
-            func = this.futureFunctions[i][1],
-            layer = this.futureFunctions[i][2];
-
-        if (time <= this.seconds) {
-            this.activeLayer = layer;
-            this.futureFunctions.splice(i, 1);
-            func();
-        }
-    }
-
     for (var i in this.layers) {
         var layer = this.layers[i];
         if (layer.paused) {
@@ -213,6 +201,18 @@ gl4.step = function () {
                 // choose what will be the next active layer.
                 return;
             }
+        }
+    }
+
+    for (var i = this.futureFunctions.length - 1; i >= 0; i--) {
+        var time = this.futureFunctions[i][0],
+            func = this.futureFunctions[i][1],
+            layer = this.futureFunctions[i][2];
+
+        if (time <= this.seconds) {
+            this.activeLayer = layer;
+            this.futureFunctions.splice(i, 1);
+            func();
         }
     }
 
@@ -379,7 +379,6 @@ Entity.prototype.render = function (context) {
     }
     for (var effectName in this.effects) {
         this.effects[effectName](context);
-        delete this.effects[effectName];
     }
 
     this.draw(context);
@@ -426,6 +425,10 @@ Entity.prototype.step = function () {
     this.inertia.y *= (1 - this.friction.y);
     this.inertia.angle *= (1 - this.friction.angle);
     this.alpha = Math.min(Math.max(this.alpha, 0.0), 1.0);
+
+    for (var effectName in this.effects) {
+        delete this.effects[effectName];
+    }
 };
 
 
