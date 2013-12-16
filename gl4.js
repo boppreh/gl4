@@ -45,7 +45,7 @@ var gl4 = {
 
 gl4.schedule = function (delay, func) {
     if (func.id !== undefined) {
-        this.unregister(fun);
+        this.unregister(func);
     }
     this.futureFunctions.push([this.seconds + delay, func]);
 }
@@ -179,7 +179,12 @@ gl4.step = function () {
 
     while (this.futureFunctions.length &&
            this.futureFunctions[0][0] <= this.seconds) {
-        this.futureFunctions.shift()[1]();
+        var func =  this.futureFunctions.shift()[1];
+        if (func.id === undefined) {
+            func();
+        } else {
+            gl4.register(func);
+        }
     }
 
     for (var i in this.layers) {
