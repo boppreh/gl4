@@ -359,7 +359,9 @@ Entity.prototype.render = function (context) {
     if (gl4.debug) {
         // Print all tags on top right corner of entity, one below
         // the other.
-        var i = 0;
+        context.fillText('Layer ' + gl4.layers.indexOf(this.layer),
+                         this.size.x / 2, -this.size.y / 2);
+        var i = 1;
         for (var tag in this.tags) {
             var x = this.size.x / 2,
                 y = -this.size.y / 2 + i++ * 16;
