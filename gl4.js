@@ -261,10 +261,6 @@ window.addEventListener('keyup', function (event) {
     gl4.processKeyEvent(event, false);
 }, false);
 
-window.addEventListener('blur', function (event) {
-    console.log('Should have stopped, but there\'s no stop yet.');
-}, false);
-
 
 function Layer() {
     this.entities = {};
