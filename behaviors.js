@@ -218,14 +218,9 @@ function fadeOut(tag, speed) {
     speed = speed === undefined ? 0.05 : speed;
 
     return gl4.register(tag, function (object) {
-        var alpha = object.alpha || 1.0;
-        object.alpha = alpha -= speed;
+        object.alpha -= speed;
         if (object.alpha <= 0) {
             object.destroy();
-        } else {
-            object.effects['alpha'] = function (context) {
-                context.globalAlpha = object.alpha;
-            }
         }
     });
 }
@@ -277,12 +272,8 @@ function shadow(object, offset, blur, color) {
 function alpha(object, amount) {
     amount = amount === undefined ? 0.5 : amount;
 
-    function effect(context) {
-       context.globalAlpha -= 1 - amount;
-    }
-
     return gl4.register(object, function (object) {
-        object.effects['alpha'] = effect;
+        object.alpha = amount;
     });
 }
 
