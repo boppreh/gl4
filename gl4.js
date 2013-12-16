@@ -47,6 +47,10 @@ gl4.schedule = function (delay, func) {
     if (func.id !== undefined) {
         this.unregister(func);
     }
+    if (delay === 0) {
+        func();
+        return;
+    }
     this.futureFunctions.push([this.seconds + delay, func]);
 }
 
@@ -182,8 +186,8 @@ gl4.step = function () {
             func = this.futureFunctions[i][1];
 
         if (time <= this.seconds) {
-            func();
             this.futureFunctions.splice(i, 1);
+            func();
         }
     }
 
@@ -297,6 +301,8 @@ Layer.prototype.register = function (/*tag1, tag2, tag3, func*/) {
 
 Layer.prototype.unregister = function (behavior) {
     delete this.behaviors[behavior.id];
+    delete behavior.id;
+    delete behavior.layer;
 };
 
 Layer.prototype.add = function (entity) {
@@ -324,6 +330,7 @@ function Entity(draw, tags, pos, size, inertia, friction) {
     this.inertia = fillDefault(inertia, {x: 0, y: 0, angle: 0});
     this.friction = fillDefault(friction, {x: 0.8, y: 0.8, angle: 0.8});
 
+    this.alpha = 1.0;
     this.effects = {};
     this.tags = {};
 
@@ -364,6 +371,9 @@ Entity.prototype.render = function (context) {
     }
 
     context.rotate(-this.pos.angle);
+    if (this.alpha !== undefined) {
+        context.globalAlpha = this.alpha;
+    }
     for (var effectName in this.effects) {
         this.effects[effectName](context);
         delete this.effects[effectName];
