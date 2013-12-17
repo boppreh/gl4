@@ -166,7 +166,7 @@ function shoot(origin, imgSource, tags, force, friction) {
     return gl4.register(origin, function (obj) {
         var angle = obj.pos.angle,
             distance = obj.size.x / 2,
-            cos = -Math.cos(angle),
+            cos = Math.cos(angle),
             sin = -Math.sin(angle),
             pos = {x: obj.pos.x + cos * distance,
                    y: obj.pos.y + sin * distance,
@@ -174,7 +174,7 @@ function shoot(origin, imgSource, tags, force, friction) {
             inertia = {x: cos * force,
                        y: sin * force};
 
-        gl4.createImg(imgSource, tags, pos, inertia, friction);
+        gl4.createImage(imgSource, tags, pos, inertia, friction);
     });
 }
 
