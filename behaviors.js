@@ -330,7 +330,7 @@ function once(behaviors) {
 
 function keyboardControl(objectTag, controls, force, frictionAmount) {
     controls = controls || ['up', 'down', 'left', 'right'];
-    force = force === undefined ? 1 : 0;
+    force = force === undefined ? 1 : force;
     return gl4.register(objectTag, function (object) {
         if (frictionAmount !== undefined) {
             object.friction.x = frictionAmount;
