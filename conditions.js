@@ -115,7 +115,13 @@ function keyDown(key) {
 }
 
 function keyUp(key) {
-    return not(keyDown(key));
+    return function() {
+        if (gl4.pressedKeys[key]) {
+            return [];
+        } else {
+            return [[]];
+        }
+    };
 }
 
 function hit(objectTag, targetTag) {
