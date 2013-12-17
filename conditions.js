@@ -115,13 +115,7 @@ function keyDown(key) {
 }
 
 function keyUp(key) {
-    return function() {
-        if (gl4.pressedKeys[key]) {
-            return [];
-        } else {
-            return [[]];
-        }
-    };
+    return not(keyDown(key));
 }
 
 function hit(objectTag, targetTag) {
@@ -172,7 +166,7 @@ function distance(objectTag, targetTag, maxDistance) {
 
 function not(condition) {
     return function () {
-        if (condition.length === 0) {
+        if (condition().length === 0) {
             return [[]];
         } else {
             return [];
