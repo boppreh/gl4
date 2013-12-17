@@ -369,3 +369,20 @@ function keyboardControl(objectTag, controls, force, frictionAmount) {
     });
 
 }
+
+function group(/*behaviors*/) {
+    var behaviors = Array.prototype.slice.call(arguments, 0);
+    if (behaviors.id) {
+        behaviors = [behaviors];
+    }
+
+    for (var i in behaviors) {
+        gl4.unregister(behaviors[i]);
+    }
+
+    return gl4.register(function () {
+        for (var i in behaviors) {
+            behaviors[i]();
+        }
+    });
+}
