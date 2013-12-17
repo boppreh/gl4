@@ -217,8 +217,9 @@ function pulse(frequency, source, startAsTrue) {
     }
 }
 
-function up(condition) {
+function up(condition, start) {
     var pastValues = {};
+    start = start || false;
 
     return function() {
         var matches = [];
@@ -230,7 +231,8 @@ function up(condition) {
                 ids.push(match[i].id);
             }
             var key = String(ids);
-            if (!pastValues[key]) {
+            if (pastValues[key] === false ||
+                (pastValues[key] === undefined && !start)) {
                 matches.push(match);
             }
             pastValues[key] = true;
