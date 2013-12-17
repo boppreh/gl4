@@ -519,6 +519,14 @@ TextEntity.prototype.subtract = function (amount) {
     }
 };
 
+TextEntity.prototype.set = function (amount) {
+    var self = this;
+    amount = amount === undefined ? 1 : amount;
+    return function() {
+        self.value = amount;
+    }
+};
+
 TextEntity.prototype.at = function (min, max) {
     min = min || 0;
     max = max === undefined ? min : max;
