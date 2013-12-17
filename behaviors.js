@@ -327,3 +327,28 @@ function once(behaviors) {
         behaviors[i]();
     }
 }
+
+function keyboardControl(objectTag, controls, force, frictionAmount) {
+    controls = controls || ['up', 'down', 'left', 'right'];
+    force = force === undefined ? 1 : 0;
+    return gl4.register(objectTag, function (object) {
+        if (frictionAmount !== undefined) {
+            object.friction.x = frictionAmount;
+            object.friction.y = frictionAmount;
+        }
+
+        if (gl4.pressedKeys[controls[0]]) {
+            object.push({y: -force});
+        }
+        if (gl4.pressedKeys[controls[1]]) {
+            object.push({y: force});
+        }
+        if (gl4.pressedKeys[controls[2]]) {
+            object.push({x: -force});
+        }
+        if (gl4.pressedKeys[controls[3]]) {
+            object.push({x: force});
+        }
+    });
+
+}
