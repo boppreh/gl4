@@ -163,6 +163,8 @@ function reflect(target, start, end) {
  * Creates new objects from the origin of a tagged object, with the same angle.
  */
 function shoot(origin, imgSource, tags, force, friction) {
+    force = force === undefined ? 10 : force;
+    friction = fillDefault(friction, {x: 0.01, y: 0.01});
     return gl4.register(origin, function (obj) {
         var angle = obj.pos.angle,
             distance = obj.size.x / 2,
@@ -174,7 +176,7 @@ function shoot(origin, imgSource, tags, force, friction) {
             inertia = {x: cos * force,
                        y: sin * force};
 
-        gl4.createImage(imgSource, tags, pos, inertia, friction);
+        gl4.createImage(imgSource, tags, pos, {}, inertia, friction);
     });
 }
 
