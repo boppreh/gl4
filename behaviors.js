@@ -34,7 +34,7 @@ function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
     var maxDistanceSquared = maxTolerableDistance * maxTolerableDistance;
 
     function findAngle(currentAngle, difX, difY) {
-        var angle = Math.atan2(difY, difX);
+        var angle = Math.atan2(-difY, difX);
         if (force < 0) {
             angle += Math.PI;
         }
