@@ -70,7 +70,7 @@ function follow(objTag, targetTag, force, maxTolerableDistance, turningSpeed) {
 
             object.push({x: Math.cos(angle) * f, y: Math.sin(angle) * f});
         } else {
-            object.pos.angle = findAngle(object.angle, difX, difY);
+            object.pos.angle = findAngle(object.pos.angle, difX, difY);
         }
     });
 }
