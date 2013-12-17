@@ -114,6 +114,10 @@ function keyDown(key) {
     };
 }
 
+function keyUp(key) {
+    return not(keyDown(key));
+}
+
 function hit(objectTag, targetTag) {
     return function() {
         var matches = [];
@@ -162,7 +166,11 @@ function distance(objectTag, targetTag, maxDistance) {
 
 function not(condition) {
     return function () {
-        return condition().length === 0;
+        if (condition.length === 0) {
+            return [[]];
+        } else {
+            return [];
+        }
     }
 }
 
