@@ -189,6 +189,23 @@ function slowDown(tag, slowness) {
     });
 }
 
+function swapTags(firstTag, secondTag) {
+    return gl4.register(function () {
+        gl4.forEach(firstTag, function (object) {
+            object.untag(firstTag); 
+            object.tag('temporary swap tag'); 
+        });
+        gl4.forEach(secondTag, function (object) {
+            object.untag(secondTag); 
+            object.tag(firstTag); 
+        });
+        gl4.forEach('temporary swap tag', function (object) {
+            object.tag(secondTag); 
+            object.untag('temporary swap tag'); 
+        });
+    });
+}
+
 function tag(targets, tag) {
     return gl4.register(targets, function (target) {
         target.tag(tag);
