@@ -395,9 +395,10 @@ Entity.prototype.move = function (speed) {
     this.pos.x += speed.x || 0;
     this.pos.y += speed.y || 0;
     this.pos.angle += speed.angle || 0;
+    /*
     while (this.pos.angle < 0) {
         this.pos.angle += Math.PI * 2;
-    }
+    }*/
     while (this.pos.angle > Math.PI * 2) {
         this.pos.angle -= Math.PI * 2;
     }
@@ -552,21 +553,21 @@ function ImageEntity(imageSource/*, rest of Entity params*/) {
         image.src = imageSource;
         var self = this;
         image.addEventListener('load', function () {
-            self.size = {x: image.width, y: image.height};
+            if (self.size.x === 0 && self.size.y === 0) {
+                self.size = {x: image.width, y: image.height};
+            }
         });
 
         ImageEntity.cache[imageSource] = image;
     }
 
     this.image = ImageEntity.cache[imageSource];
-    this.size = {x: this.image.width, y: this.image.height};
+    if (this.size.x === 0 && this.size.y === 0) {
+        this.size = {x: this.image.width, y: this.image.height};
+    }
     this.draw = function (context) {
         if (this.image.width !== 0) {
-            context.scale(this.size.x / this.image.width,
-                          this.size.y / this.image.height);
-
-            context.drawImage(this.image,
-                              -this.image.width / 2, -this.image.height / 2);
+            context.drawImage(this.image, -this.size.x / 2, -this.size.y / 2, this.size.x, this.size.y);
         }
     }
 }
