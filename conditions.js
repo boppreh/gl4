@@ -42,6 +42,23 @@ function on(condition, successBehaviors, failureBehaviors) {
     });
 }
 
+function mouseUp(objectTag) {
+    objectTag = objectTag || gl4.screen;
+    return function () {
+        if (gl4.mouse.isDown) {
+            return [];
+        }
+
+        var matches = [];
+        gl4.forEach(objectTag, function (object) {
+            if (object.hitTest(gl4.mouse)) {
+                matches.push([object]);
+            }
+        });
+        return matches;
+    };
+}
+
 function mouseDown(objectTag) {
     objectTag = objectTag || gl4.screen;
     return function () {
@@ -56,16 +73,6 @@ function mouseDown(objectTag) {
             }
         });
         return matches;
-    };
-}
-
-function mouseUp() {
-    return function () {
-        if (gl4.mouse.isDown) {
-            return [[]];
-        } else {
-            return [];
-        }
     };
 }
 
@@ -246,5 +253,14 @@ function up(condition, start) {
         }
 
         return matches;
+    }
+}
+
+function exists(tag) {
+    return function() {
+        for (var i in gl4.tagged(tag)) {
+            return [[]];
+        }
+        return [];
     }
 }
