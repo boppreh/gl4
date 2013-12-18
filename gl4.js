@@ -120,6 +120,14 @@ gl4.remove = function () {
     this.activeLayer.remove.apply(this.activeLayer, arguments);
 };
 
+gl4.createAnimation = function () {
+    var params = Array.prototype.slice(arguments, 0);
+    var entity = new AnimatedEntity();
+    AnimatedEntity.apply(entity, arguments);
+    this.add(entity);
+    return entity;
+};
+
 gl4.createImage = function () {
     var params = Array.prototype.slice(arguments, 0);
     var entity = new ImageEntity();
@@ -586,6 +594,61 @@ ImageEntity.prototype = Object.create(Entity.prototype);
 ImageEntity.prototype.constructor = ImageEntity;
 
 ImageEntity.cache = {};
+
+
+
+function AnimatedEntity(frameSources/*, other Entity params*/) {
+    Entity.apply(this, Array.prototype.slice.call(arguments, 0));
+    if (frameSources === undefined) {
+        return;
+    }
+    this.frames = [];
+    this.frame = 0;
+    this.playing = false;
+    for (var i in frameSources) {
+        this.frames[i] = gl4.loadImage(frameSources[i]);
+    }
+
+    this.draw = function (context) {
+        var n = this.frames.length;
+        while (this.frame >= n) {
+            this.frame -= n;
+        }
+        while (this.frame < 0) {
+            this.frame += n;
+        }
+
+        var frameImage = this.frames[this.frame];
+        if (frameImage.width === 0) {
+            return;
+        }
+    
+        context.drawImage(frameImage, -this.size.x / 2, -this.size.y / 2, this.size.x, this.size.y);
+    }
+}
+
+AnimatedEntity.prototype = Object.create(ImageEntity.prototype);
+AnimatedEntity.prototype.constructor = AnimatedEntity;
+
+AnimatedEntity.cache = {};
+
+AnimatedEntity.prototype.next = function () {
+    var self = this;
+    return function () { self.frame++; }
+};
+
+AnimatedEntity.prototype.prev = function () {
+    var self = this;
+    return function () { self.frame--; }
+};
+
+AnimatedEntity.prototype.step = function () {
+    console.log(this);
+    ImageEntity.prototype.step.call(this);
+    if (this.playing) {
+        this.frame++;
+    }
+}
 
 
 /**
