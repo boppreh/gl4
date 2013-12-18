@@ -574,6 +574,17 @@ TextEntity.prototype.at = function (min, max) {
     }
 };
 
+TextEntity.prototype.positive = function () {
+    var self = this;
+    return function () {
+        if (self.value > 0) {
+            return [[self]];
+        } else {
+            return []
+        }
+    };
+};
+
 function ImageEntity(imageSource/*, rest of Entity params*/) {
     Entity.apply(this, Array.prototype.slice.call(arguments, 0));
     if (!imageSource) {
