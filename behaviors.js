@@ -139,22 +139,39 @@ function reflect(target, start, end) {
 
     start = start || {x: 0, y: 0};
     end = end || {x: canvas.width, y: canvas.height};
-    var size = {x: end.x - start.x, y: end.y - start.y};
 
     return gl4.register(target, function (object) {
         var pos = object.pos;
         var inertia = object.inertia;
 
-        if (pos.x < start.x) {
-            inertia.x = Math.abs(inertia.x);
-        } else if (pos.x > end.x) {
-            inertia.x = -Math.abs(inertia.x);
+        for (var property in start) {
+            if (pos[property] < start[property]) {
+                inertia[property] = Math.abs(inertia[property]);
+            } else if (pos[property] > end[property]) {
+                inertia[property] = -Math.abs(inertia[property]);
+            }
         }
+    });
+}
 
-        if (pos.y < start.y) {
-            inertia.y = Math.abs(inertia.y);
-        } else if (pos.y > end.y) {
-            inertia.y = -Math.abs(inertia.y);
+function limit(target, start, end) {
+    if (end === undefined && start !== undefined) {
+        end = start;
+        start = undefined;
+    }
+
+    start = start || {x: 0, y: 0};
+    end = end || {x: canvas.width, y: canvas.height};
+
+    return gl4.register(target, function (object) {
+        var pos = object.pos;
+
+        for (var property in start) {
+            if (pos[property] < start[property]) {
+                pos[property] = start[property];
+            } else if (pos[property] > end[property]) {
+                pos[property] = end[property];
+            }
         }
     });
 }
