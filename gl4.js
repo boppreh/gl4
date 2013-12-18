@@ -604,7 +604,6 @@ function AnimatedEntity(frameSources/*, other Entity params*/) {
     }
     this.frames = [];
     this.frame = 0;
-    this.playing = false;
     for (var i in frameSources) {
         this.frames[i] = gl4.loadImage(frameSources[i]);
     }
@@ -641,14 +640,6 @@ AnimatedEntity.prototype.prev = function () {
     var self = this;
     return function () { self.frame--; }
 };
-
-AnimatedEntity.prototype.step = function () {
-    console.log(this);
-    ImageEntity.prototype.step.call(this);
-    if (this.playing) {
-        this.frame++;
-    }
-}
 
 
 /**
