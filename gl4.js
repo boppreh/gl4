@@ -55,6 +55,9 @@ gl4.loadImage = function (src, onLoad) {
                 onLoad(image);
             });
         }
+        image.addEventListener('error', function (event) {
+            console.error('Error loading image', src, event);
+        });
 
         gl4.imageCache[src] = image;
     } else {
