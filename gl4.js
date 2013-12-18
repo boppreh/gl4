@@ -631,16 +631,6 @@ AnimatedEntity.prototype.constructor = AnimatedEntity;
 
 AnimatedEntity.cache = {};
 
-AnimatedEntity.prototype.next = function () {
-    var self = this;
-    return function () { self.frame++; }
-};
-
-AnimatedEntity.prototype.prev = function () {
-    var self = this;
-    return function () { self.frame--; }
-};
-
 
 /**
  * Returns an object with randomized attributes, between the given min and max

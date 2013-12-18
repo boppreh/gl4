@@ -403,3 +403,9 @@ function group(/*behaviors*/) {
         }
     });
 }
+
+function play(objectTag, speed) {
+    return gl4.register(objectTag, function (object) {
+        object.frame += speed;
+    });
+}
